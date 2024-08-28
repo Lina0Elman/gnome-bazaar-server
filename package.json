@@ -1,0 +1,16 @@
+{
+  "name": "gnome-bazaar-server",
+  "version": "1.0.0",
+  "description": "gnome bazaar server side",
+  "author": {
+    "name": "Liav Tibi, Lina Elman, Shir Hirsh, Elad Ovadia"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "test-me"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "4.19.2"
+  }
+}
