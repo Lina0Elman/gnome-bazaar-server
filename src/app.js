@@ -2,8 +2,8 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const authMiddleware = require('./middleware/authMiddleware');
-const userRoutes = require('./routes/userRoutes');
+const authMiddleware = require('./middlewares/auth');
+const userRoutes = require('./routes/users');
 
 const app = express();
 
@@ -17,10 +17,10 @@ app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' folder
 
 // Use custom middleware
-app.use(authMiddleware);
+// app.use(authMiddleware);
 
 // Register routes
-app.use('/api/users', userRoutes); // Mount user routes on '/api/users'
+// app.use('/api/users', userRoutes); // Mount user routes on '/api/users'
 
 // Define a basic route (optional)
 app.get('/', (req, res) => {
