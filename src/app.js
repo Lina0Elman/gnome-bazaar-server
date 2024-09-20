@@ -4,13 +4,19 @@ const path = require('path');
 const cors = require("cors");
 const bodyParser = require('body-parser');
 const config = require('./../config');
-const authMiddleware = require('./middlewares/auth');
 const userRoutes = require('./routes/users');
 
 const app = express();
 
 
 // Middleware setup
+app.use(cors({ origin: '*' }));
+app.use(bodyParser.json());
+
+app.use(`${config.app.baseName}/api`, userRoutes);
+
+
+
 // app.use(bodyParser.json());       // Parse JSON bodies
 // app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
 // app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' folder
@@ -27,7 +33,6 @@ const app = express();
 // });
 
 
-app.use(bodyParser.json());
 app.use(cors({ origin: "*" }));
 app.use((req, res, next) => {
   console.log(`[${new Date().toLocaleString()}]`);
@@ -42,31 +47,20 @@ app.get(`/image-repo/:img`, async (req, res) => {
   res.sendFile(path.join(__dirname, "public", 'assets', img));
 });
 
-app.post(`${config.app.baseName}/api/token`, (req, res) => {
-  const { user, pwd } = req.body;
-  console.log(user, pwd);
-  if (user !== "admin" || pwd !== "Aa123456!") {
-    res.status(401).end();
-    return;
-  }
-
-  res.json({
-    name: "Elad D Gozman",
-    expiry: new Date(),
-    token: " d",
-    isAdmin: true,
-    isSupplier: true,
-  });
-});
 app.get(`${config.app.baseName}/404`, (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
+
+
 
 app.get(config.app.baseName, (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
+
 app.use(express.static(path.join(__dirname, "dist")));
+
+
 
 app.get(`${config.app.baseName}/*`, (req, res, next) => {
   const requestPath = req.path.replace(config.app.baseName, "");
@@ -83,14 +77,19 @@ app.get(`${config.app.baseName}/*`, (req, res, next) => {
   }
 });
 
+
 app.use((req, res) => {
   res.redirect(`${config.app.baseName}/404`);
 });
+
+
 
 // Error handling middleware (optional) -- move to middlewares
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');
 });
+
+
 
 module.exports = app;
