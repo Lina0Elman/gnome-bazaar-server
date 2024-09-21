@@ -1,68 +1,21 @@
-const basicAuth = require('../middlewares/auth');
-const app = require('../app');
-const config = require('../../config');
-
 const express = require('express');
 const router = express.Router();
+const userController = require('../controllers/user');
+const basicAuth = require('../middlewares/auth');
 
-
-// Apply the authentication middleware to a specific route
-// app.post(`${config.app.baseName}/api/token`, basicAuth, (req, res) => {
-//     const { user, pwd } = req.body;
-//     console.log(user, pwd);
-
-//     // res.json({
-//     //     name: "Elad D Gozman",
-//     //     expiry: new Date(),
-//     //     token: "dummy-token",
-//     //     isAdmin: true,
-//     //     isSupplier: true,
-//     // });
-// });
-// Route to get a list of users from MongoDB
-router.get('/', async (req, res) => {
-    try {
-        const mongo = await getMongoClient('gnomeBazaar');
-        const collection = mongo.collection('users');
-        const users = await collection.find().toArray();
-
-        res.json(users);
-    } catch (err) {
-        console.error('Error fetching users:', err);
-        res.status(500).json({ message: 'Error fetching users' });
-    }
-});
-
+// Route to get all users
+router.get('/', userController.getAllUsers);
 
 // Route to get a specific user by ID
-router.get('/:id', async (req, res) => {
-    try {
-        const mongo = await getMongoClient('gnomeBazaar');
-        const collection = mongo.collection('users');
-        const user = await collection.findOne({ id: req.params.id });
+router.get('/:id', userController.getUserById);
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        res.json(user);
-    } catch (err) {
-        console.error('Error fetching user:', err);
-        res.status(500).json({ message: 'Error fetching user' });
-    }
-});
+// Route to update a user
+router.put('/:id', userController.updateUser);
 
+// Route to add a new user
+router.post('/user', userController.addUser);
 
-
-router.post(`/token`, basicAuth, (req, res) => {
-    console.log("token for user: " + req.user.fullName);
-    // At this point, req.user contains the authenticated user from MongoDB
-    res.json({
-        name: req.user.fullName,
-        expiry: new Date(),
-        token: "dummy-token",
-        isAdmin: req.user.role === 'admin',  // Assuming the role is stored in the 'role' field
-        isSupplier: req.user.role === 'supplier', // Example of checking other roles
-    });
-});
+// Token generation route with authentication middleware
+router.post('/token', basicAuth, userController.generateToken);
 
 module.exports = router;

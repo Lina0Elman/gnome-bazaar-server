@@ -1,6 +1,6 @@
 // const jwt = require('jsonwebtoken');
 const config = require('../../config');
-const { getMongoClient } = require('../models/mongo'); // Ensure you have the correct path to mongo.js
+const { getMongoClient } = require('../models/mongo');
 const bcrypt = require('bcrypt'); // Use bcrypt for password hashing (optional, if you're storing hashed passwords)
 
 
@@ -36,9 +36,8 @@ async function basicAuth(req, res, next) {
     }
   
     try {
-        // Connect to MongoDB and get the 'users' collection
-        const mongo = await getMongoClient('gnomeBazaar');
-        const collection = mongo.collection('users');
+        const mongo = await getMongoClient(config.mongoClient.name);
+        const collection = mongo.collection(config.mongoClient.usersCollection);
 
         // Find the user in the database
         const dbUser = await collection.findOne({ userName: user });

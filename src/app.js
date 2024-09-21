@@ -58,7 +58,8 @@ app.get(config.app.baseName, (req, res) => {
 });
 
 
-app.use(express.static(path.join(__dirname, "dist")));
+// todo move client to dist under src :)
+// app.use(express.static(path.join(__dirname, "dist")));
 
 
 

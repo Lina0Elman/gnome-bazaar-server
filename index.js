@@ -59,8 +59,8 @@ function startMongoContainer(alreadyTried) {
 
 async function insertTestData() {
     try {
-        const mongo = await getMongoClient('gnomeBazaar');
-        const collection = mongo.collection('users');
+        const mongo = await getMongoClient(config.mongoClient.name);
+        const collection = mongo.collection(config.mongoClient.usersCollection);
 
         const testData = [
             { 
@@ -78,7 +78,7 @@ async function insertTestData() {
                 userName: 'guest',
                 pwd: await bcrypt.hash('guest', 10), // 10 is the salt
                 fullName: 'guest',
-                mail: 'linlin@gmail.com',
+                mail: 'guest@gmail.com',
                 phone: '053',
                 credits: 200,
                 role: null
