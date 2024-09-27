@@ -95,8 +95,9 @@ exports.generateToken = (req, res) => {
     res.json({
         name: req.user.fullName,
         expiry: new Date(),
-        token: "dummy-token",
+        token: "dummy-token", // todo token
         isAdmin: req.user.role === 'admin',
         isSupplier: req.user.role === 'supplier',
+        uuid: req.user.id
     });
 };

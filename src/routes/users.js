@@ -13,9 +13,11 @@ router.get('/:id', userController.getUserById);
 router.put('/:id', userController.updateUser);
 
 // Route to add a new user
-router.post('/user', userController.addUser);
+router.post('/update-user-profile/:id', userController.updateUser);
 
 // Token generation route with authentication middleware
 router.post('/token', basicAuth, userController.generateToken);
+
+router.get('/user-profile/:id', userController.getUserById);
 
 module.exports = router;

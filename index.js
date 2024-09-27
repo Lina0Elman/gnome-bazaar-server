@@ -81,7 +81,7 @@ async function insertTestData() {
                 mail: 'guest@gmail.com',
                 phone: '053',
                 credits: 200,
-                role: null
+                role: 'Supplier'
             }
         ];
 
