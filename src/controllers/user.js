@@ -4,17 +4,15 @@ const { v4: uuidv4 } = require('uuid');
 const config = require('../../config');
 
 // Controller to get all users
-exports.getAllUsers = async (req, res) => {
+const getAllUsers = async () => {
     try {
-        const mongo = await getMongoClient(config.mongoClient.name);
-        const collection = mongo.collection(config.mongoClient.usersCollection);
-        const users = await collection.find().toArray();
-        res.json(users);
-    } catch (err) {
-        console.error('Error fetching users:', err);
-        res.status(500).json({ message: 'Error fetching users' });
+        const users = await User.find().populate('cart');
+        return users;
+    } catch (error) {
+        throw new Error('Error retrieving users: ' + error.message);
     }
 };
+
 
 // Controller to get a specific user
 exports.getUserById = async (req, res) => {
@@ -63,29 +61,45 @@ exports.updateUser = async (req, res) => {
 
 // Controller to add a new user
 exports.addUser = async (req, res) => {
-    const { userName, pwd, fullName, mail, phone, credits, role } = req.body;
+    // const { userName, pwd, fullName, mail, phone, credits, role } = req.body;
 
+    const { role } = req.body;
     try {
-        const mongo = await getMongoClient(config.mongoClient.name);
-        const collection = mongo.collection(config.mongoClient.usersCollection);
+        if (!['Admin', 'Supplier', 'User'].includes(role)) {
+            throw new Error('Invalid role');
+        }
 
         const hashedPassword = await bcrypt.hash(pwd, 10); // Hash the password
-        const newUser = {
-            id: uuidv4(),
-            userName,
-            pwd: hashedPassword,
-            fullName,
-            mail,
-            phone,
-            credits,
-            role,
-        };
+        const userData = {...[req.body], pwd: hashedPassword};
 
-        await collection.insertOne(newUser);
-        res.status(201).json({ message: 'User added successfully', userId: newUser.id });
+        const user = await addUser(userData);
+        res.status(201).json({ message: 'User added successfully', userId: user._id });
     } catch (err) {
         console.error('Error adding user:', err);
         res.status(500).json({ message: 'Error adding user' });
+    }
+};
+
+const addUser = async (userData, role) => {
+    try {
+        if (!['Admin', 'Supplier', 'User'].includes(role)) {
+            throw new Error('Invalid role');
+        }
+
+        const user = new User({
+            userName: userData.userName,
+            pwd: userData.pwd,  // Hash the password in production
+            mail: userData.mail,
+            fullName: userData.fullName,
+            phone: userData.phone,
+            credits: userData.credits || 0,
+            role: role,
+        });
+
+        await user.save();
+        return user;
+    } catch (error) {
+        throw new Error('Error adding user: ' + error.message);
     }
 };
 
