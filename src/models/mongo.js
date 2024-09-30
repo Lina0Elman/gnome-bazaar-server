@@ -1,7 +1,7 @@
 // models/db.js
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const dotenv = require('dotenv');
-const config = require('../../config')
+const config = require('../../config');
 
 // Initialize environment variables
 dotenv.config();
