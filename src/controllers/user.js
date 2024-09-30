@@ -1,7 +1,6 @@
-const { getMongoClient } = require('../models/mongo');
-const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
-const config = require('../../config');
+import bcrypt from 'bcrypt';
+import config from '../../config';
+import User from '../models/User';
 
 // Controller to get all users
 const getAllUsers = async () => {
@@ -72,34 +71,11 @@ exports.addUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(pwd, 10); // Hash the password
         const userData = {...[req.body], pwd: hashedPassword};
 
-        const user = await addUser(userData);
+        const user = await User.addUser(userData);
         res.status(201).json({ message: 'User added successfully', userId: user._id });
     } catch (err) {
         console.error('Error adding user:', err);
         res.status(500).json({ message: 'Error adding user' });
-    }
-};
-
-const addUser = async (userData, role) => {
-    try {
-        if (!['Admin', 'Supplier', 'User'].includes(role)) {
-            throw new Error('Invalid role');
-        }
-
-        const user = new User({
-            userName: userData.userName,
-            pwd: userData.pwd,  // Hash the password in production
-            mail: userData.mail,
-            fullName: userData.fullName,
-            phone: userData.phone,
-            credits: userData.credits || 0,
-            role: role,
-        });
-
-        await user.save();
-        return user;
-    } catch (error) {
-        throw new Error('Error adding user: ' + error.message);
     }
 };
 

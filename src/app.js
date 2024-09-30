@@ -8,6 +8,8 @@ const userRoutes = require('./routes/users');
 
 const app = express();
 
+connectToDatabase();
+
 
 // Middleware setup
 app.use(cors({ origin: '*' }));
