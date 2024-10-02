@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     mail: { type: mongoose.Schema.Types.String, required: true },
     fullName: { type: mongoose.Schema.Types.String, required: true },
     phone: { type: mongoose.Schema.Types.String, required: true },
-    credits: { type: mongoose.Schema.Types.Decimal128 },
+    credits: { type: mongoose.Schema.Types.Decimal128, default: 0 },
     role: { type: mongoose.Schema.Types.String, required: true },
     cart: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]  // Reference to products
 }, {
@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema({
             ret.id = ret._id;  // Map _id to id
             delete ret._id;     // Optionally remove _id from the response
             delete ret.__v;     // Optionally remove __v (version key)
+
+            if (ret.credits instanceof mongoose.Types.Decimal128) {
+                ret.credits = parseFloat(ret.credits.toString());
+            }
+            
             return ret;
         }
     }
