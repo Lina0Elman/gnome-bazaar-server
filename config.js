@@ -8,5 +8,7 @@ module.exports = {
     app: {
         port: process.env.PORT || 5000,
         baseName: process.env.BASE_NAME || '/Gnome-Bazaar'
-    }
+    },
+    jwtSecret: process.env.JWT_SECRET || 'lala',
+
 };

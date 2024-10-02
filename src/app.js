@@ -5,17 +5,18 @@ const cors = require("cors");
 const bodyParser = require('body-parser');
 const config = require('./../config');
 const userRoutes = require('./routes/users');
+const productsRoutes = require('./routes/products');
 
 const app = express();
 
-connectToDatabase();
 
 
 // Middleware setup
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 
-app.use(`${config.app.baseName}/api`, userRoutes);
+app.use(`${config.app.baseName}/api/user`, userRoutes);
+app.use(`${config.app.baseName}/api/products`, productsRoutes);
 
 
 

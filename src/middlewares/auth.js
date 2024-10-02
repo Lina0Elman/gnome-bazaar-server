@@ -2,6 +2,12 @@
 const config = require('../../config');
 const { getMongoClient } = require('../models/mongo');
 const bcrypt = require('bcrypt'); // Use bcrypt for password hashing (optional, if you're storing hashed passwords)
+const User = require('../models/User');
+
+
+// use jwt
+
+
 
 
 // // Middleware function to authenticate requests
@@ -36,11 +42,8 @@ async function basicAuth(req, res, next) {
     }
   
     try {
-        const mongo = await getMongoClient(config.mongoClient.name);
-        const collection = mongo.collection(config.mongoClient.usersCollection);
-
         // Find the user in the database
-        const dbUser = await collection.findOne({ userName: user });
+        const dbUser = await User.findOne({ userName: user });
 
         if (!dbUser) {
             return res.status(401).json({ message: 'User not found' });

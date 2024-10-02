@@ -1,29 +1,31 @@
-import bcrypt from 'bcrypt';
-import config from '../../config';
-import User from '../models/User';
+// controllers/user.js
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken'); // Assuming you'll implement JWT
+const User = require('../models/User');
+const config = require('../../config'); // Ensure your config has necessary keys
+const Purchase = require('../models/Purchase'); // Adjust the path as necessary
+
+
 
 // Controller to get all users
-const getAllUsers = async () => {
+exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().populate('cart');
-        return users;
+        const users = await User.getAllUsers();
+        res.json(users);
     } catch (error) {
-        throw new Error('Error retrieving users: ' + error.message);
+        console.error('Error retrieving users:', error);
+        res.status(500).json({ message: 'Error retrieving users' });
     }
 };
 
-
-// Controller to get a specific user
+// Controller to get a specific user by ID
 exports.getUserById = async (req, res) => {
     try {
-        const mongo = await getMongoClient(config.mongoClient.name);
-        const collection = mongo.collection(config.mongoClient.usersCollection);
-        const user = await collection.findOne({ id: req.params.id });
-
+        const user = await User.findOne({ id: req.params.userId }).populate('cart');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.json(user);
+        res.json(user._doc);
     } catch (err) {
         console.error('Error fetching user:', err);
         res.status(500).json({ message: 'Error fetching user' });
@@ -34,42 +36,44 @@ exports.getUserById = async (req, res) => {
 exports.updateUser = async (req, res) => {
     const { id } = req.params;
     const { userName, pwd, fullName, mail, phone, credits, role } = req.body;
+    const requesterId = req.user.id; // Assuming `basicAuth` middleware sets `req.user`
 
     try {
-        const mongo = await getMongoClient(config.mongoClient.name);
-        const collection = mongo.collection(config.mongoClient.usersCollection);
-
-        let updateFields = { userName, fullName, mail, phone, credits, role };
+        let updateData = { userName, fullName, mail, phone, credits, role };
 
         if (pwd) {
-            updateFields.pwd = await bcrypt.hash(pwd, 10); // Hash the new password
+            updateData.pwd = await bcrypt.hash(pwd, 10); // Hash the new password
         }
 
-        const updatedUser = await collection.updateOne({ id }, { $set: updateFields });
+        const updatedUser = await User.updateUserInfo(id, updateData, requesterId);
 
-        if (updatedUser.matchedCount === 0) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        res.json({ message: 'User updated successfully' });
+        res.json(updatedUser);
     } catch (err) {
         console.error('Error updating user:', err);
-        res.status(500).json({ message: 'Error updating user' });
+        res.status(500).json({ message: err.message });
     }
 };
 
 // Controller to add a new user
 exports.addUser = async (req, res) => {
-    // const { userName, pwd, fullName, mail, phone, credits, role } = req.body;
+    const { userName, pwd, fullName, mail, phone, credits, role } = req.body;
 
-    const { role } = req.body;
     try {
         if (!['Admin', 'Supplier', 'User'].includes(role)) {
-            throw new Error('Invalid role');
+            return res.status(400).json({ message: 'Invalid role' });
         }
 
         const hashedPassword = await bcrypt.hash(pwd, 10); // Hash the password
-        const userData = {...[req.body], pwd: hashedPassword};
+
+        const userData = {
+            userName,
+            pwd: hashedPassword,
+            fullName,
+            mail,
+            phone,
+            credits: credits || 0,
+            role,
+        };
 
         const user = await User.addUser(userData);
         res.status(201).json({ message: 'User added successfully', userId: user._id });
@@ -80,14 +84,74 @@ exports.addUser = async (req, res) => {
 };
 
 // Controller for token generation
-exports.generateToken = (req, res) => {
-    console.log("looking for a token for user: " + req.user.fullName);
-    res.json({
-        name: req.user.fullName,
-        expiry: new Date(),
-        token: "dummy-token", // todo token
-        isAdmin: req.user.role === 'admin',
-        isSupplier: req.user.role === 'supplier',
-        uuid: req.user.id
-    });
+exports.generateToken = async (req, res) => {
+    try {
+        // Implement JWT token generation
+        const payload = {
+            id: req.user._id,
+            fullName: req.user.fullName,
+            role: req.user.role,
+        };
+
+        const token = jwt.sign(payload, config.jwtSecret, { expiresIn: '1h' });
+
+        res.json({
+            name: req.user.fullName,
+            expiry: new Date(Date.now() + 3600000), // 1 hour
+            token: token,
+            isAdmin: req.user.role === 'Admin',
+            isSupplier: req.user.role === 'Supplier',
+            uuid: req.user._id,
+        });
+    } catch (error) {
+        console.error('Error generating token:', error);
+        res.status(500).json({ message: 'Error generating token' });
+    }
+};
+
+
+
+
+exports.getUserExpenses = async (req, res) => {
+    const userId = req.params.id; // Assuming user ID is available through authentication
+
+    try {
+        // Find purchases by the user
+        const purchases = await Purchase.find({ user: userId }).populate('product');
+        if (!purchases.length) {
+            return res.status(404).json({ message: 'No purchases found' });
+        }
+
+        // Calculate total expenses based on purchase totalCost
+        const totalExpenses = purchases.reduce((total, purchase) => {
+            return total + parseFloat(purchase.totalCost.toString());
+        }, 0);
+
+        res.status(200).json({ totalExpenses, purchases });
+    } catch (err) {
+        console.error('Error fetching user expenses:', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+
+exports.getUserCategories = async (req, res) => {
+    const userId = req.params.id; // Assuming user ID is available through authentication
+
+    try {
+        // Find purchases by the user and populate the product details
+        const purchases = await Purchase.find({ user: userId }).populate('product');
+        if (!purchases.length) {
+            return res.status(404).json({ message: 'No purchases found' });
+        }
+
+        // Extract unique categories from the purchased products
+        const categories = [...new Set(purchases.map(purchase => purchase.product.category))];
+
+        res.status(200).json({ categories });
+    } catch (err) {
+        console.error('Error fetching user categories:', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 };

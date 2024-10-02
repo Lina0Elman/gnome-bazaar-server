@@ -1,10 +1,11 @@
 const app = require('./src/app');
 const dotenv = require('dotenv');
 const { exec } = require('child_process');
-const { getMongoClient } = require('./src/models/mongo');
+const bcrypt = require('bcrypt');
 const config = require('./config');
 const { v4: uuidv4 } = require('uuid');
-const bcrypt = require('bcrypt'); // Use bcrypt for password hashing
+const { connectToDatabase } = require('./src/models/database');
+const User = require('./src/models/User');  // Import the User model
 
 // Initialize environment variables
 dotenv.config();
@@ -38,11 +39,10 @@ function startMongoContainer(alreadyTried) {
             if (err) {
                 console.error('Error starting MongoDB Docker container:', err);
                 if (!alreadyTried) {
-                    // If the first attempt fails, stop and remove the container, then try again
                     stopAndRemoveContainer('gnome-bazaar-mongo')
                         .then(() => {
                             console.log('Retrying to start MongoDB Docker container...');
-                            return startMongoContainer(true); // Retry after removing the container
+                            return startMongoContainer(true);
                         })
                         .then(resolve)
                         .catch(reject);
@@ -59,34 +59,34 @@ function startMongoContainer(alreadyTried) {
 
 async function insertTestData() {
     try {
-        const mongo = await getMongoClient(config.mongoClient.name);
-        const collection = mongo.collection(config.mongoClient.usersCollection);
+        await connectToDatabase();
 
         const testData = [
             { 
-                id: uuidv4(),
                 userName: 'lina',
-                pwd: await bcrypt.hash('123', 10), // 10 is the salt
+                pwd: await bcrypt.hash('123', 10), // Hashing password
                 fullName: 'lina',
                 mail: 'linlin@gmail.com',
                 phone: '052',
                 credits: 830,
-                role: 'admin'
+                role: 'admin',
+                cart: []
             },
             { 
-                id: uuidv4(),
                 userName: 'guest',
-                pwd: await bcrypt.hash('guest', 10), // 10 is the salt
+                pwd: await bcrypt.hash('guest', 10),
                 fullName: 'guest',
                 mail: 'guest@gmail.com',
                 phone: '053',
                 credits: 200,
-                role: 'Supplier'
+                role: 'Supplier',
+                cart: []
             }
         ];
 
-        const result = await collection.insertMany(testData);
-        console.log(`Inserted ${result.insertedCount} test documents into the collection.`);
+        // Insert test users using the Mongoose User model
+        await User.insertMany(testData);
+        console.log(`Inserted test users successfully.`);
     } catch (err) {
         console.error('Error inserting test data:', err);
         stopAndRemoveContainer('gnome-bazaar-mongo');

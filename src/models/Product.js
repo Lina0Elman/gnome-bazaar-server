@@ -1,4 +1,6 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
+const User = require('../models/User'); // Adjust the path as necessary
+
 
 const productSchema = new mongoose.Schema({
     name: { type: mongoose.Schema.Types.String, required: true },
