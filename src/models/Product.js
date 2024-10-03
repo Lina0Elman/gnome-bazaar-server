@@ -1,16 +1,37 @@
 const mongoose = require("mongoose");
-const User = require('../models/User'); // Adjust the path as necessary
+const User = require('../models/User'); // needed
+
 
 
 const productSchema = new mongoose.Schema({
     name: { type: mongoose.Schema.Types.String, required: true },
     description: { type: mongoose.Schema.Types.String, required: true },
-    img: { type: mongoose.Schema.Types.Buffer },  // Buffer type for images
-    price: { type: mongoose.Schema.Types.Decimal128, required: true },
+    img: { type: mongoose.Schema.Types.Buffer, default: null },  // Optional image
+    price: { 
+        type: mongoose.Schema.Types.Decimal128, 
+        required: true, 
+        min: [0, 'Price cannot be negative']  // Validate positive price
+    },
     category: { type: mongoose.Schema.Types.String, required: true },
-    quantity: { type: mongoose.Schema.Types.Number, required: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }  // Reference to the seller
+    quantity: { 
+        type: mongoose.Schema.Types.Number, 
+        required: true, 
+        min: [0, 'Quantity cannot be negative'],  // Validate positive quantity
+        default: 0  // Default value for quantity
+    },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }  // Reference to the seller, required
+}, {
+    toJSON: {
+        transform: function(doc, ret) {
+            if (ret.price instanceof mongoose.Types.Decimal128) {
+                ret.price = parseFloat(ret.price.toString());
+            }
+
+            return ret;
+        }
+    }
 });
+
 
 // Static methods for Product model
 productSchema.statics.addProduct = async function (productData, userId) {

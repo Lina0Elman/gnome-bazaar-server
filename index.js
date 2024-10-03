@@ -6,9 +6,24 @@ const config = require('./config');
 const { v4: uuidv4 } = require('uuid');
 const { connectToDatabase } = require('./src/models/database');
 const User = require('./src/models/User');  // Import the User model
+const Product = require('./src/models/Product');  // Import the Product model
+const utils = require('./testDataUtils');
 
 // Initialize environment variables
 dotenv.config();
+
+const fs = require('fs');
+
+// Function to load image as buffer
+const loadImageAsBuffer = (imagePath) => {
+    try {
+        // const imagePath = path.join(__dirname, 'public', 'assets', imageName);
+        return fs.readFileSync(imagePath);  // Read the file as buffer
+    } catch (err) {
+        console.error(`Error loading image ${imageName}:`, err);
+        return null;
+    }
+};
 
 // Function to stop and remove Docker container
 function stopAndRemoveContainer(containerName) {
@@ -87,6 +102,27 @@ async function insertTestData() {
         // Insert test users using the Mongoose User model
         await User.insertMany(testData);
         console.log(`Inserted test users successfully.`);
+
+        const testProducts = [];
+        for (let i = 0; i < 50; i++) {
+            const category = utils.randomCategory();
+            const product = {
+            id: i.toString(),
+            description: `זה מוצר מסוג ${category}`,
+            img: loadImageAsBuffer(utils.randomImage()),
+            name: "מוצר" + " " + i,
+            price: utils.randomBetween(250, 600),
+            category: category,
+            quantity: utils.randomBetween(0, 10),
+            user: (await User.findOne({ userName: 'lina' }))._id
+            };
+            testProducts.push(product);
+        }
+
+        // Insert test products
+        await Product.insertMany(testProducts);
+        console.log(`Inserted test products successfully.`);
+
     } catch (err) {
         console.error('Error inserting test data:', err);
         stopAndRemoveContainer('gnome-bazaar-mongo');
