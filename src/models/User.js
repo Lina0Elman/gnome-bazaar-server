@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
             if (ret.credits instanceof mongoose.Types.Decimal128) {
                 ret.credits = parseFloat(ret.credits.toString());
             }
-            
+
             return ret;
         }
     }
@@ -52,8 +52,8 @@ userSchema.statics.addUser = async function (userData) {
     }
 };
 
-userSchema.statics.updateUserInfo = async function (userId, updateData, requesterId) {
-    const requester = await this.findById(requesterId);
+userSchema.statics.updateUserInfo = async function (userId, updateData) {
+    const requester = await this.findById(userId);
     if (!requester) throw new Error('Requester not found');
 
     try {

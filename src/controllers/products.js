@@ -18,4 +18,6 @@ const getSupplierProducts = async (req, res) => {
     }
 };
 
+
+
 module.exports = { getSupplierProducts };

@@ -1,8 +1,6 @@
 // controllers/user.js
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken'); // Assuming you'll implement JWT
 const User = require('../models/User');
-const config = require('../../config'); // Ensure your config has necessary keys
 const Purchase = require('../models/Purchase'); // Adjust the path as necessary
 
 
@@ -36,16 +34,16 @@ exports.getUserById = async (req, res) => {
 exports.updateUser = async (req, res) => {
     const { id } = req.params;
     const { userName, pwd, fullName, mail, phone, credits, role } = req.body;
-    const requesterId = req.user.id; // Assuming `basicAuth` middleware sets `req.user`
+   // const requesterId = req.user.id; // Assuming `basicAuth` middleware sets `req.user`
 
     try {
-        let updateData = { userName, fullName, mail, phone, credits, role };
+        let updateData = { userName, fullName, mail, phone, credits, role, pwd };
 
-        if (pwd) {
-            updateData.pwd = await bcrypt.hash(pwd, 10); // Hash the new password
-        }
+        // if (pwd) {
+        //     updateData.pwd = await bcrypt.hash(pwd, 10); // Hash the new password
+        // }
 
-        const updatedUser = await User.updateUserInfo(id, updateData, requesterId);
+        const updatedUser = await User.updateUserInfo(id, updateData);
 
         res.json(updatedUser);
     } catch (err) {
@@ -83,34 +81,6 @@ exports.addUser = async (req, res) => {
     }
 };
 
-// Controller for token generation
-exports.generateToken = async (req, res) => {
-    try {
-        // Implement JWT token generation
-        const payload = {
-            id: req.user._id,
-            fullName: req.user.fullName,
-            role: req.user.role,
-        };
-
-        const token = jwt.sign(payload, config.jwtSecret, { expiresIn: '1h' });
-
-        res.json({
-            name: req.user.fullName,
-            expiry: new Date(Date.now() + 3600000), // 1 hour
-            token: token,
-            isAdmin: req.user.role === 'Admin',
-            isSupplier: req.user.role === 'Supplier',
-            uuid: req.user._id,
-        });
-    } catch (error) {
-        console.error('Error generating token:', error);
-        res.status(500).json({ message: 'Error generating token' });
-    }
-};
-
-
-
 
 exports.getUserExpenses = async (req, res) => {
     const userId = req.params.id; // Assuming user ID is available through authentication
@@ -133,6 +103,33 @@ exports.getUserExpenses = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+
+
+
+exports.getUserPurchases = async (req, res) => {
+    const userId = req.params.id; // Assuming user ID is available through authentication
+
+    try {
+        // Find purchases by the user
+        const purchases = await Purchase.find({ user: userId }).populate('product');
+        if (!purchases.length) {
+            return res.status(404).json({ message: 'No purchases found' });
+        }
+
+        // Calculate total expenses based on purchase totalCost
+        const totalExpenses = purchases.reduce((total, purchase) => {
+            return total + parseFloat(purchase.totalCost.toString());
+        }, 0);
+
+        res.status(200).json({ totalExpenses, purchases });
+    } catch (err) {
+        console.error('Error fetching user expenses:', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
 
 
 

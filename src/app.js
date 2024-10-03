@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const config = require('./../config');
 const userRoutes = require('./routes/users');
 const productsRoutes = require('./routes/products');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(bodyParser.json());
 
 app.use(`${config.app.baseName}/api/user`, userRoutes);
 app.use(`${config.app.baseName}/api/products`, productsRoutes);
+app.use(`${config.app.baseName}/api/token`, authRoutes);
 
 
 
