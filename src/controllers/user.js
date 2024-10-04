@@ -19,7 +19,7 @@ exports.getAllUsers = async (req, res) => {
 // Controller to get a specific user by ID
 exports.getUserById = async (req, res) => {
     try {
-        const user = await User.findOne({ _id: req.params.id }).populate('cart');
+        const user = await User.findOne({ _id: req.user.id }).populate('cart');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -32,7 +32,7 @@ exports.getUserById = async (req, res) => {
 
 // Controller to update a user
 exports.updateUser = async (req, res) => {
-    const { id } = req.params;
+    const id = req.user.id;
     const { userName, pwd, fullName, mail, phone, credits, role } = req.body;
    // const requesterId = req.user.id; // Assuming `basicAuth` middleware sets `req.user`
 
@@ -83,7 +83,7 @@ exports.addUser = async (req, res) => {
 
 
 exports.getUserExpenses = async (req, res) => {
-    const userId = req.params.id; // Assuming user ID is available through authentication
+    const userId = req.user.id; // Assuming user ID is available through authentication
 
     try {
         // Find purchases by the user
@@ -108,7 +108,7 @@ exports.getUserExpenses = async (req, res) => {
 
 
 exports.getUserPurchases = async (req, res) => {
-    const userId = req.params.id; // Assuming user ID is available through authentication
+    const userId = req.user.id; // Assuming user ID is available through authentication
 
     try {
         // Find purchases by the user

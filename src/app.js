@@ -10,7 +10,9 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
-
+// Increase the size limit for JSON and URL-encoded data
+app.use(express.json({ limit: '5mb' })); // Set limit as per your need (e.g., 10MB)
+app.use(express.urlencoded({ limit: '5mb', extended: true })); // For URL-encoded data
 
 // Middleware setup
 app.use(cors({ origin: '*' }));

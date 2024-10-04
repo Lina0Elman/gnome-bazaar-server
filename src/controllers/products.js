@@ -46,11 +46,12 @@ const getProducts = async (req, res) => {
 
 
 const uploadSupplierProduct = async (req, res) => {
-    const { name, description, price, category, quantity } = req.body;
-    const userId = req.params.id; 
+    const { name, description, price, category, quantity, img } = req.body;
+    const userId = req.user.id; 
 
     try {
-        const imgBuffer = req.file ? req.file.buffer : null;  // Get the Buffer from file if available
+        // Convert base64 to binary
+        const imgBuffer = Buffer.from(img.split(',')[1], 'base64');
 
         const productData = { name, description, price, category, quantity, img: imgBuffer };
 

@@ -17,7 +17,6 @@ const fs = require('fs');
 // Function to load image as buffer
 const loadImageAsBuffer = (imagePath) => {
     try {
-        // const imagePath = path.join(__dirname, 'public', 'assets', imageName);
         return fs.readFileSync(imagePath);  // Read the file as buffer
     } catch (err) {
         console.error(`Error loading image ${imageName}:`, err);
