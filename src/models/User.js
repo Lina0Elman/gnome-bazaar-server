@@ -4,6 +4,17 @@ const bcrypt = require('bcrypt');
 const Product = require('../models/Product'); // Adjust the path as necessary
 
 
+// Cart item schema to store product reference and quantity
+const cartItemSchema = new mongoose.Schema({
+    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+    quantity: { 
+        type: mongoose.Schema.Types.Number, 
+        required: true, 
+        min: [1, 'Quantity cannot be less than 1'],  // Ensure quantity is at least 1
+        default: 1  // Default quantity is 1
+    }
+}, { _id: false }); // Disable auto-generated _id for cart items
+
 
 const userSchema = new mongoose.Schema({
     userName: { type: mongoose.Schema.Types.String, required: true },
@@ -13,7 +24,7 @@ const userSchema = new mongoose.Schema({
     phone: { type: mongoose.Schema.Types.String, required: true },
     credits: { type: mongoose.Schema.Types.Decimal128, default: 0 },
     role: { type: mongoose.Schema.Types.String, required: true },
-    cart: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]  // Reference to products
+    cart: [cartItemSchema]
 }, {
     toJSON: {
         transform: function(doc, ret) {
