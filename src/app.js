@@ -5,15 +5,22 @@ const cors = require("cors");
 const bodyParser = require('body-parser');
 const config = require('./../config');
 const userRoutes = require('./routes/users');
+const productsRoutes = require('./routes/products');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
+// Increase the size limit for JSON and URL-encoded data
+app.use(express.json({ limit: '5mb' })); // Set limit as per your need (e.g., 10MB)
+app.use(express.urlencoded({ limit: '5mb', extended: true })); // For URL-encoded data
 
 // Middleware setup
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 
-app.use(`${config.app.baseName}/api`, userRoutes);
+app.use(`${config.app.baseName}/api/user`, userRoutes);
+app.use(`${config.app.baseName}/api/products`, productsRoutes);
+app.use(`${config.app.baseName}/api/token`, authRoutes);
 
 
 

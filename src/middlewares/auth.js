@@ -1,30 +1,30 @@
 // const jwt = require('jsonwebtoken');
 const config = require('../../config');
-const { getMongoClient } = require('../models/mongo');
 const bcrypt = require('bcrypt'); // Use bcrypt for password hashing (optional, if you're storing hashed passwords)
+const User = require('../models/User');
+const jwt = require('jsonwebtoken'); // Assuming you'll implement JWT
 
+// Middleware function to authenticate requests using JWT
+function authenticateToken(req, res, next) {
+    // Get the token from the request header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Extract token from the "Bearer" scheme
 
-// // Middleware function to authenticate requests
-// function authenticateToken(req, res, next) {
-//     // Get the token from the request header
-//     const authHeader = req.headers['authorization'];
-//     const token = authHeader && authHeader.split(' ')[1]; // Bearer token
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
 
-//     if (!token) {
-//         return res.status(401).json({ message: 'No token provided' });
-//     }
+    // Verify the token using your secret
+    jwt.verify(token, config.jwtSecret, (err, decoded) => {
+        if (err) {
+            return res.status(403).json({ message: 'Invalid token' });
+        }
 
-//     // Verify the token using your secret
-//     jwt.verify(token, config.app.jwtSecret, (err, user) => {
-//         if (err) {
-//             return res.status(403).json({ message: 'Invalid token' });
-//         }
-        
-//         // If verification is successful, attach the user to the request object
-//         req.user = user;
-//         next(); // Move on to the next middleware or route handler
-//     });
-// }
+        // If verification is successful, attach the user to the request object
+        req.user = decoded; // The `decoded` object will contain the user information (e.g., id, role)
+        next(); // Move on to the next middleware or route handler
+    });
+}
 
 
 // Middleware function for basic authentication
@@ -36,11 +36,8 @@ async function basicAuth(req, res, next) {
     }
   
     try {
-        const mongo = await getMongoClient(config.mongoClient.name);
-        const collection = mongo.collection(config.mongoClient.usersCollection);
-
         // Find the user in the database
-        const dbUser = await collection.findOne({ userName: user });
+        const dbUser = await User.findOne({ userName: user });
 
         if (!dbUser) {
             return res.status(401).json({ message: 'User not found' });
@@ -63,4 +60,4 @@ async function basicAuth(req, res, next) {
 }
 
 
-module.exports = basicAuth;
+module.exports = {basicAuth, authenticateToken};
