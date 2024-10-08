@@ -83,7 +83,7 @@ async function insertTestData() {
                 mail: 'linlin@gmail.com',
                 phone: '052',
                 credits: 830,
-                role: 'admin',
+                role: 'Admin',
                 cart: []
             },
             { 
