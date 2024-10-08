@@ -1,13 +1,16 @@
 const mongoose = require("mongoose");
 
+// Define the Purchase schema
 const purchaseSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-    quantity: { type: mongoose.Schema.Types.Number, required: true },
+    products: [{
+        product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+        quantity: { type: Number, required: true },
+        price: { type: mongoose.Schema.Types.Decimal128, required: true }
+    }],
     totalCost: { type: mongoose.Schema.Types.Decimal128, required: true },
-    purchaseDate: { type: mongoose.Schema.Types.Date, default: Date.now },
+    purchaseDate: { type: Date, default: Date.now }
 });
-
 
 // Static methods for Purchase model
 purchaseSchema.statics.createPurchase = async function (userId, productId, quantity) {
