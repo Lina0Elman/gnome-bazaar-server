@@ -88,23 +88,31 @@ exports.getUserExpenses = async (req, res) => {
 
     try {
         // Find purchases by the user
-        const purchases = await Purchase.find({ user: userId }).populate('product');
+        const purchases = await Purchase.find({ user: userId }).populate('products.product');
+        
         if (!purchases.length) {
             return res.status(400).json({ message: 'No purchases found' });
         }
 
-        // Calculate total expenses based on purchase totalCost
-        const totalExpenses = purchases.reduce((total, purchase) => {
-            return total + parseFloat(purchase.totalCost.toString());
-        }, 0);
+        // Transform the data into DataPreviewType
+        const dataPreview = purchases.map(purchase => {
+            const totalCost = parseFloat(purchase.totalCost.toString());
+            const totalQuantity = purchase.products.reduce((sum, product) => sum + product.quantity, 0);
+            const productTitles = purchase.products.map(p => p.product.name).join(', ');
 
-        res.status(200).json({ totalExpenses, purchases });
+            return {
+                title: productTitles,
+                value: totalQuantity,
+                total: totalCost
+            };
+        });
+
+        res.status(200).json(dataPreview);  // Respond with the DataPreviewType array
     } catch (err) {
         console.error('Error fetching user expenses:', err);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-
 
 
 
