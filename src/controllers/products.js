@@ -1,5 +1,9 @@
 const Product = require('../models/Product'); 
 const mongoose = require("mongoose");
+const NodeCache = require('node-cache');
+
+// Create a cache with a TTL of 5 minutes (300 seconds)
+const productCache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
 
 
 // Controller function to get supplier products
@@ -7,7 +11,16 @@ const getProducts = async (req, res) => {
     try {
         const { productName, category, skip = 0, take = 10 } = req.query;// Build the filter object based on the provided query parameters
 
-        
+        // Create a unique cache key based on query parameters
+        const cacheKey = `products_${productName || ''}_${category || ''}_${skip}_${take}`;
+
+        // Check if data is already cached
+        if (productCache.has(cacheKey)) {
+            console.log('Returning cached data');
+            const cachedProducts = productCache.get(cacheKey);
+            return res.json(cachedProducts);
+        }
+
         const filter = {};
         if (productName) {
             filter.name = { $regex: new RegExp(productName, 'i') };  // Case-insensitive search
@@ -34,6 +47,9 @@ const getProducts = async (req, res) => {
             img: product.img ? `data:image/webp;base64,${product.img.toString('base64')}` : null
         }));
 
+        // Store the result in the cache
+        productCache.set(cacheKey, productsWithImages);
+
         // Send the products as a JSON response
         res.json(productsWithImages);
 
@@ -56,6 +72,10 @@ const uploadSupplierProduct = async (req, res) => {
         const productData = { name, description, price, category, quantity, img: imgBuffer };
 
         const product = await Product.addProduct(productData, userId);
+
+        // Invalidate the cache after adding a new product
+        productCache.flushAll();
+
         res.status(201).json(product);
     } catch (error) {
         res.status(500).json({ message: 'Error adding product: ' + error.message });
