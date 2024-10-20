@@ -19,7 +19,7 @@ exports.generateToken = async (req, res) => {
             expiry: new Date(Date.now() + 3600000), // 1 hour
             token: token,
             isAdmin: req.user.role === 'Admin',
-            isSupplier: req.user.role === 'Supplier',
+            isSupplier: req.user.role === 'Supplier' | 'Admin',
             uuid: req.user._id,
         });
     } catch (error) {

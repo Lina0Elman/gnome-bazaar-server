@@ -7,6 +7,8 @@ const config = require('./../config');
 const userRoutes = require('./routes/users');
 const productsRoutes = require('./routes/products');
 const authRoutes = require('./routes/auth');
+const supplierRoutes = require('./routes/supplier');
+const { authenticateToken } = require('./middlewares/auth');
 
 const app = express();
 
@@ -18,26 +20,15 @@ app.use(express.urlencoded({ limit: '5mb', extended: true })); // For URL-encode
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 
-app.use(`${config.app.baseName}/api/user`, userRoutes);
-app.use(`${config.app.baseName}/api/products`, productsRoutes);
-app.use(`${config.app.baseName}/api/token`, authRoutes);
+// with auth middleware
+app.use(`${config.app.baseName}/api/user`, authenticateToken, userRoutes);
+app.use(`${config.app.baseName}/api/products`, authenticateToken, productsRoutes);
+app.use(`${config.app.baseName}/api/supplier`, authenticateToken, supplierRoutes);
+app.use(`${config.app.baseName}/api/token`, authenticateToken, authRoutes);
 
 
 
-// app.use(bodyParser.json());       // Parse JSON bodies
-// app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
 // app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' folder
-
-// Use custom middleware
-// app.use(authMiddleware);
-
-// Register routes
-// app.use('/api/users', userRoutes); // Mount user routes on '/api/users'
-
-// Define a basic route (optional)
-// app.get('/', (req, res) => {
-//     res.send('Hello, world!');
-// });
 
 
 app.use(cors({ origin: "*" }));

@@ -103,7 +103,7 @@ async function insertTestData() {
         console.log(`Inserted test users successfully.`);
 
         const testProducts = [];
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 15; i++) {
             const category = utils.randomCategory();
             const product = {
             id: i.toString(),
