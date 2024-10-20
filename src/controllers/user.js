@@ -132,12 +132,14 @@ exports.getUserPurchases = async (req, res) => {
             uuid: purchase._id,
             date: purchase.purchaseDate,
             products: purchase.products.map(item => ({
-                productId: item.product._id,
-                productName: item.product.name, 
-                quantity: item.quantity,
-                price: parseFloat(item.price.toString())
+                product: {
+                    productId: item.product._id,
+                    productName: item.product.name, 
+                    quantity: item.quantity,
+                    price: parseFloat(item.price.toString())
+                },
+                quantity: item.quantity
             })),
-            // totalCost: parseFloat(purchase.totalCost.toString())
         }));
 
         res.status(200).json(purchases);
