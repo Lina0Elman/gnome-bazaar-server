@@ -5,7 +5,6 @@ const User = require('../models/User');
 const Purchase = require('../models/Purchase'); // Adjust the path as necessary
 const Product = require('../models/Product'); // Adjust the path as necessary
 const mongoose = require("mongoose");
-const roles = require('../utils/consts');
 const {isRoleValid} = require("../utils/roleUtils");
 
 
@@ -333,13 +332,13 @@ exports.updateUserRole = async (req, res) => {
 
 // Add Credits to User
 exports.sendCreditsToUser = async (req, res) => {
-    const { userId, credits } = req.body;
+    const { userId, creditsToAdd } = req.body;
 
-    if (!userId || credits == null) {
+    if (!userId || creditsToAdd == null) {
         return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Missing required fields' });
     }
 
-    if (typeof credits !== 'number' || credits <= 0) {
+    if (typeof creditsToAdd !== 'number' || creditsToAdd <= 0) {
         return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid credits value' });
     }
 
@@ -349,7 +348,7 @@ exports.sendCreditsToUser = async (req, res) => {
             return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
         }
 
-        user.credits = (user.credits || 0) + credits;
+        user.credits = (user.credits || 0) + creditsToAdd;
         await user.save();
 
         res.json({ message: 'Credits added successfully' });

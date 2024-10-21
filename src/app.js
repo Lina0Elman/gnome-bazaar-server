@@ -8,6 +8,7 @@ const userRoutes = require('./routes/users');
 const productsRoutes = require('./routes/products');
 const authRoutes = require('./routes/auth');
 const supplierRoutes = require('./routes/supplier');
+const adminRoutes = require('./routes/admin');
 const { authenticateToken } = require('./middlewares/auth');
 
 const app = express();
@@ -20,11 +21,19 @@ app.use(express.urlencoded({ limit: '5mb', extended: true })); // For URL-encode
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 
-// with auth middleware
-app.use(`${config.app.baseName}/api/user`, authenticateToken, userRoutes);
-app.use(`${config.app.baseName}/api/products`, authenticateToken, productsRoutes);
-app.use(`${config.app.baseName}/api/supplier`, authenticateToken, supplierRoutes);
+
+// Exclude auth routes from authentication
 app.use(`${config.app.baseName}/api/token`, authRoutes);
+
+// Apply authenticateToken middleware to all other routes
+app.use(authenticateToken);
+
+// with auth middleware
+app.use(`${config.app.baseName}/api/user`, userRoutes);
+app.use(`${config.app.baseName}/api/products`, productsRoutes);
+app.use(`${config.app.baseName}/api/supplier`, supplierRoutes);
+app.use(`${config.app.baseName}/api/admin`, adminRoutes);
+
 
 
 
