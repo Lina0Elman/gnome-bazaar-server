@@ -80,7 +80,7 @@ userSchema.statics.updateUserInfo = async function (userId, updateData) {
 userSchema.statics.changeUserRole = async function (userId, newRole, requesterId) {
     const requester = await this.findById(requesterId);
     if (!requester) throw new Error('Requester not found');
-
+    // TODO - consider using the adminAuth middleware
     if (requester.role !== 'Admin') {
         throw new Error('Unauthorized: Only admins can change user roles.');
     }
@@ -98,7 +98,7 @@ userSchema.statics.changeUserRole = async function (userId, newRole, requesterId
 userSchema.statics.removeUser = async function (userId, requesterId) {
     const requester = await this.findById(requesterId);
     if (!requester) throw new Error('Requester not found');
-
+    // TODO - consider using the adminAuth middleware
     if (requester.role !== 'Admin') {
         throw new Error('Unauthorized: Only admins can remove users.');
     }

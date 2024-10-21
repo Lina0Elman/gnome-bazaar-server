@@ -1,4 +1,4 @@
-// const jwt = require('jsonwebtoken');
+const { StatusCodes } = require ('http-status-codes');const Purchase = require('../models/Purchase');
 const config = require('../../config');
 const bcrypt = require('bcrypt'); // Use bcrypt for password hashing (optional, if you're storing hashed passwords)
 const User = require('../models/User');
@@ -11,13 +11,13 @@ function authenticateToken(req, res, next) {
     const token = authHeader && authHeader.split(' ')[1]; // Extract token from the "Bearer" scheme
 
     if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
+        return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'No token provided' });
     }
 
     // Verify the token using your secret
     jwt.verify(token, config.jwtSecret, (err, decoded) => {
         if (err) {
-            return res.status(403).json({ message: 'Invalid token' });
+            return res.status(StatusCodes.FORBIDDEN).json({ message: 'Invalid token' });
         }
 
         // If verification is successful, attach the user to the request object

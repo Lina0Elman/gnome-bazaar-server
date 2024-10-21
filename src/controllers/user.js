@@ -1,9 +1,12 @@
 // controllers/user.js
+const { StatusCodes, getReasonPhrase } = require ('http-status-codes');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const Purchase = require('../models/Purchase'); // Adjust the path as necessary
 const Product = require('../models/Product'); // Adjust the path as necessary
 const mongoose = require("mongoose");
+const roles = require('../utils/consts');
+const {isRoleValid} = require("../utils/roleUtils");
 
 
 // Controller to get all users
@@ -13,7 +16,7 @@ exports.getAllUsers = async (req, res) => {
         res.json(users);
     } catch (error) {
         console.error('Error retrieving users:', error);
-        res.status(500).json({ message: 'Error retrieving users' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error retrieving users' });
     }
 };
 
@@ -27,7 +30,7 @@ exports.getUserById = async (req, res) => {
         res.json(user);
     } catch (err) {
         console.error('Error fetching user:', err);
-        res.status(500).json({ message: 'Error fetching user' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching user' });
     }
 };
 
@@ -41,7 +44,7 @@ exports.getAdminSalesInfo = async (req, res) => {
     { date: new Date(2024, 7, 1), close: 170 },
   ];
 
-  res.status(200).json(data);
+  res.status(StatusCodes.OK).json(data);
 };
 
 // Controller to update a user
@@ -62,7 +65,7 @@ exports.updateUser = async (req, res) => {
         res.json(updatedUser);
     } catch (err) {
         console.error('Error updating user:', err);
-        res.status(500).json({ message: err.message });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: err.message });
     }
 };
 
@@ -71,8 +74,8 @@ exports.addUser = async (req, res) => {
     const { userName, pwd, fullName, mail, phone, credits, role } = req.body;
 
     try {
-        if (!['Admin', 'Supplier', 'User'].includes(role)) {
-            return res.status(400).json({ message: 'Invalid role' });
+        if (!isRoleValid(role)) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid role' });
         }
 
         const hashedPassword = await bcrypt.hash(pwd, 10); // Hash the password
@@ -88,10 +91,10 @@ exports.addUser = async (req, res) => {
         };
 
         const user = await User.addUser(userData);
-        res.status(201).json({ message: 'User added successfully', userId: user._id });
+        res.status(StatusCodes.CREATED).json({ message: 'User added successfully', userId: user._id });
     } catch (err) {
         console.error('Error adding user:', err);
-        res.status(500).json({ message: 'Error adding user' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error adding user' });
     }
 };
 
@@ -104,7 +107,7 @@ exports.getUserExpenses = async (req, res) => {
         const purchases = await Purchase.find({ user: userId }).populate('products.product');
         
         if (!purchases.length) {
-            return res.status(200).json({ message: 'No purchases found' });
+            return res.status(StatusCodes.NO_CONTENT).json({ message: 'No purchases found' });
         }
 
         // Transform the data into DataPreviewType
@@ -120,10 +123,10 @@ exports.getUserExpenses = async (req, res) => {
             };
         });
 
-        res.status(200).json(dataPreview);  // Respond with the DataPreviewType array
+        res.status(StatusCodes.OK).json(dataPreview);  // Respond with the DataPreviewType array
     } catch (err) {
         console.error('Error fetching user expenses:', err);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
     }
 };
 
@@ -137,7 +140,7 @@ exports.getUserPurchases = async (req, res) => {
         const userPurchases = await Purchase.find({ user: userId }).populate('products.product');
 
         if (!userPurchases.length) {
-            return res.status(404).json({ message: 'No purchases found' });
+            return res.status(StatusCodes.NO_CONTENT).json({ message: 'No purchases found' });
         }
 
         // Structure the response
@@ -155,10 +158,10 @@ exports.getUserPurchases = async (req, res) => {
             })),
         }));
 
-        res.status(200).json(purchases);
+        res.status(StatusCodes.OK).json(purchases);
     } catch (err) {
         console.error('Error fetching user purchases:', err);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
     }
 };
 
@@ -171,16 +174,16 @@ exports.getUserCategories = async (req, res) => {
         // Find purchases by the user and populate the product details
         const purchases = await Purchase.find({ user: userId }).populate('product');
         if (!purchases.length) {
-            return res.status(404).json({ message: 'No purchases found' });
+            return res.status(StatusCodes.NO_CONTENT).json({ message: 'No purchases found' });
         }
 
         // Extract unique categories from the purchased products
         const categories = [...new Set(purchases.map(purchase => purchase.product.category))];
 
-        res.status(200).json({ categories });
+        res.status(StatusCodes.OK).json({ categories });
     } catch (err) {
         console.error('Error fetching user categories:', err);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
     }
 };
 
@@ -195,14 +198,14 @@ exports.addToCart = async (req, res) => {
         // Find the product by ID
         const product = await Product.findById(_id);
         if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'Product not found' });
         }
 
         // Find the user by their ID
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
         }
 
         // Check if the product is already in the cart
@@ -219,10 +222,10 @@ exports.addToCart = async (req, res) => {
         // Save the updated user
         await user.save();
 
-        res.status(200).json({ message: 'Product added to cart successfully', cart: user.cart });
+        res.status(StatusCodes.OK).json({ message: 'Product added to cart successfully', cart: user.cart });
     } catch (err) {
         console.error('Error adding product to cart:', err);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
     }
 };
 
@@ -235,7 +238,7 @@ exports.removeFromCart = async (req, res) => {
         // Find the user by their ID
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
         }
 
         // Find the product in the user's cart
@@ -243,7 +246,7 @@ exports.removeFromCart = async (req, res) => {
 
         if (cartItemIndex === -1) {
             // If the product is not in the cart, return an error
-            return res.status(404).json({ message: 'Product not found in cart' });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'Product not found in cart' });
         }
 
         // Check if a specific quantity was provided
@@ -263,10 +266,10 @@ exports.removeFromCart = async (req, res) => {
         // Save the updated user cart
         await user.save();
 
-        res.status(200).json({ message: 'Product removed from cart successfully', cart: user.cart });
+        res.status(StatusCodes.OK).json({ message: 'Product removed from cart successfully', cart: user.cart });
     } catch (err) {
         console.error('Error removing product from cart:', err);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
     }
 };
 
@@ -281,7 +284,7 @@ exports.getUserCartProducts = async (req, res) => {
         });
 
         if (!user || !user.cart.length) {
-            return res.status(404).json({ message: 'No products in cart' });
+            return res.status(StatusCodes.NO_CONTENT).json({ message: 'No products in cart' });
         }
 
         const cartWithImages = user.cart.map(item => ({
@@ -296,6 +299,62 @@ exports.getUserCartProducts = async (req, res) => {
         res.json(cartWithImages);  // Send the cart with images as a JSON response
     } catch (err) {
         console.error('Error fetching user cart products:', err);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
+    }
+};
+
+// Update User Role
+exports.updateUserRole = async (req, res) => {
+    const { userId, newRole } = req.body;
+
+    if (!userId || !newRole) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Missing required fields' });
+    }
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
+        }
+
+        if (!isRoleValid(newRole)) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid role' });
+        }
+
+        user.role = newRole;
+        await user.save();
+
+        res.json({ message: 'User role updated successfully' });
+    } catch (error) {
+        console.error('Error updating user role:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
+    }
+};
+
+// Add Credits to User
+exports.sendCreditsToUser = async (req, res) => {
+    const { userId, credits } = req.body;
+
+    if (!userId || credits == null) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Missing required fields' });
+    }
+
+    if (typeof credits !== 'number' || credits <= 0) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid credits value' });
+    }
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' });
+        }
+
+        user.credits = (user.credits || 0) + credits;
+        await user.save();
+
+        res.json({ message: 'Credits added successfully' });
+    } catch (error) {
+        console.error('Error adding credits to user:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
     }
 };

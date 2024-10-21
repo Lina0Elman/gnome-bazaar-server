@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user');
 const purchasesController = require('../controllers/purchases');
+const adminAuth = require('../middlewares/adminAuth');
 
 // Route to get all users
 router.get('/users', userController.getAllUsers);
@@ -25,7 +26,9 @@ router.post('/submit-purchase', purchasesController.submitPurchase)
 router.get('/user-profile', userController.getUserById);
 
 // admin
-router.get('/admin-sales-info', userController.getAdminSalesInfo)
+router.get('/admin-sales-info', adminAuth, userController.getAdminSalesInfo);
+router.post('/update-user-role', adminAuth, userController.updateUserRole);
+router.post('/send-user-credits', adminAuth, userController.sendCreditsToUser);
 
 module.exports = router;
 

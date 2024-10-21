@@ -1,4 +1,4 @@
-const Purchase = require('../models/Purchase');
+const { StatusCodes } = require ('http-status-codes');const Purchase = require('../models/Purchase');
 const Product = require('../models/Product');
 const User = require('../models/User');
 
@@ -10,7 +10,7 @@ const submitPurchase = async (req, res) => {
         const user = await User.findById(userId).populate('cart.product');
 
         if (!user.cart.length) {
-            return res.status(400).json({ message: 'Cart is empty' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Cart is empty' });
         }
 
         let totalCost = 0;
@@ -20,7 +20,7 @@ const submitPurchase = async (req, res) => {
         for (let item of user.cart) {
             const product = item.product;
             if (product.quantity < item.quantity) {
-                return res.status(400).json({ message: `Not enough stock for product: ${product.name}` });
+                return res.status(StatusCodes.BAD_REQUEST).json({ message: `Not enough stock for product: ${product.name}` });
             }
 
             // Calculate total cost for each item
@@ -41,7 +41,7 @@ const submitPurchase = async (req, res) => {
 
         // Check if the user has enough credits
         if (parseFloat(user.credits.toString()) < totalCost) {
-            return res.status(400).json({ message: 'Not enough credits' });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Not enough credits' });
         }
 
         // Deduct total cost from user credits
@@ -59,11 +59,11 @@ const submitPurchase = async (req, res) => {
         await purchase.save();
 
         // Send a success response
-        res.status(201).json({ message: 'Purchase successful', purchase });
+        res.status(StatusCodes.CREATED).json({ message: 'Purchase successful', purchase });
 
     } catch (error) {
         console.error('Error submitting purchase:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error retrieving users' });
     }
 };
 

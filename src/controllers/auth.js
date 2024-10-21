@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken'); // Assuming you'll implement JWT
 const config = require('../../config'); // Ensure your config has necessary keys
+const roles = require('../utils/consts');
+const {hasRole} = require("../utils/roleUtils");
 
 
 // Controller for token generation
@@ -18,8 +20,8 @@ exports.generateToken = async (req, res) => {
             name: req.user.fullName,
             expiry: new Date(Date.now() + 3600000), // 1 hour
             token: token,
-            isAdmin: req.user.role === 'Admin',
-            isSupplier: req.user.role === 'Supplier' | 'Admin',
+            isAdmin: hasRole(req.user.role, roles.Admin.name),
+            isSupplier: hasRole(req.user.role, roles.Supplier.name),
             uuid: req.user._id,
         });
     } catch (error) {
