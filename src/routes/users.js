@@ -24,6 +24,8 @@ router.post('/submit-purchase', purchasesController.submitPurchase)
 // Get user profile by ID
 router.get('/user-profile', userController.getUserById);
 
+// admin
+router.get('/admin-sales-info', userController.getAdminSalesInfo)
 
 module.exports = router;
 

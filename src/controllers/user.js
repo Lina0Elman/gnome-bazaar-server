@@ -31,6 +31,19 @@ exports.getUserById = async (req, res) => {
     }
 };
 
+exports.getAdminSalesInfo = async (req, res) => {
+    
+  const data = [
+    { date: new Date(2024, 3, 1), close: 1000 },
+    { date: new Date(2024, 4, 1), close: 500 },
+    { date: new Date(2024, 5, 1), close: 170 },
+    { date: new Date(2024, 6, 1), close: 170 },
+    { date: new Date(2024, 7, 1), close: 170 },
+  ];
+
+  res.status(200).json(data);
+};
+
 // Controller to update a user
 exports.updateUser = async (req, res) => {
     const id = req.user.id;
@@ -91,7 +104,7 @@ exports.getUserExpenses = async (req, res) => {
         const purchases = await Purchase.find({ user: userId }).populate('products.product');
         
         if (!purchases.length) {
-            return res.status(400).json({ message: 'No purchases found' });
+            return res.status(200).json({ message: 'No purchases found' });
         }
 
         // Transform the data into DataPreviewType

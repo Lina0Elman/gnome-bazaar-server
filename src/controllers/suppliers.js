@@ -1,5 +1,58 @@
 const Product = require('../models/Product');
 const mongoose = require('mongoose');
+const Purchase = require('../models/Purchase');
+
+
+// Controller to get category sales info grouped by month
+exports.getCategorySalesInfo = async (req, res) => {
+    const userId = req.user.id; // Assuming supplier user ID is available through authentication
+
+    try {
+        // Step 1: Find all products belonging to the supplier (user)
+        const supplierProducts = await Product.find({ user: userId }).select('_id');
+
+        // Step 2: Get the product IDs to filter purchases
+        const productIds = supplierProducts.map(product => product._id);
+
+        // Step 3: Aggregate purchases grouped by month and calculate total earnings
+        const salesInfo = await Purchase.aggregate([
+            {
+                $match: {
+                    'products.product': { $in: productIds }  // Only purchases of supplier's products
+                }
+            },
+            {
+                $unwind: '$products' // Deconstruct the products array
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: '$purchaseDate' },
+                        month: { $month: '$purchaseDate' }
+                    },
+                    totalEarnings: {
+                        $sum: { $multiply: ['$products.price', '$products.quantity'] } // Calculate earnings
+                    }
+                }
+            },
+            {
+                $sort: { '_id.year': 1, '_id.month': 1 } // Sort by year and month
+            }
+        ]);
+
+        // Step 4: Format the result into the desired structure
+        const result = salesInfo.map(info => ({
+            date: new Date(info._id.year, info._id.month - 1, 1), // JavaScript months are 0-indexed
+            close: info.totalEarnings
+        }));
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error retrieving category sales info:', error);
+        res.status(500).json({ message: 'Error retrieving sales info' });
+    }
+};
+
 
 // Controller function to get supplier products by user
 exports.getSupplierProducts = async (req, res) => {
@@ -45,40 +98,77 @@ exports.getSupplierProducts = async (req, res) => {
 
 // Controller to get all 
 exports.getSalesInfo = async (req, res) => {
-    // todo
+    const userId = req.user.id; // Assuming supplier user ID is available through authentication
+
     try {
-        const result = [
-            { date: new Date(2024, 3, 1), close: 1000 },
-            { date: new Date(2024, 4, 1), close: 500 },
-            { date: new Date(2024, 5, 1), close: 170 },
-            { date: new Date(2024, 6, 1), close: 170 },
-            { date: new Date(2024, 7, 1), close: 170 },
-        ];
+        // Step 1: Find all products belonging to the supplier (user)
+        const supplierProducts = await Product.find({ user: userId }).select('_id');
+
+        // Step 2: Get the product IDs to filter purchases
+        const productIds = supplierProducts.map(product => product._id);
+
+        // Step 3: Aggregate purchases grouped by month and calculate total earnings
+        const salesInfo = await Purchase.aggregate([
+            {
+                $match: {
+                    'products.product': { $in: productIds }  // Only purchases of supplier's products
+                }
+            },
+            {
+                $unwind: '$products' // Deconstruct the products array
+            },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: '$purchaseDate' },
+                        month: { $month: '$purchaseDate' }
+                    },
+                    totalEarnings: {
+                        $sum: {
+                            $multiply: [
+                                { $toDouble: '$products.price' }, // Convert price to double
+                                '$products.quantity'
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $sort: { '_id.year': 1, '_id.month': 1 } // Sort by year and month
+            }
+        ]);
+
+        // Step 4: Format the result into the desired structure
+        const result = salesInfo.map(info => ({
+            date: new Date(info._id.year, info._id.month - 1, 1), // JavaScript months are 0-indexed
+            close: info.totalEarnings
+        }));
 
         res.json(result);
     } catch (error) {
-        console.error('Error retrieving users:', error);
-        res.status(500).json({ message: 'Error retrieving users' });
+        console.error('Error retrieving sales info:', error);
+        res.status(500).json({ message: 'Error retrieving sales info' });
     }
 };
 
 
 
-// Controller to get all 
-exports.getCategorySalesInfo = async (req, res) => {
-    // todo
-    try {
-        const result = [
-            { date: new Date(2024, 3, 1), close: 1000 },
-            { date: new Date(2024, 4, 1), close: 500 },
-            { date: new Date(2024, 5, 1), close: 170 },
-            { date: new Date(2024, 6, 1), close: 170 },
-            { date: new Date(2024, 7, 1), close: 170 },
-        ];
 
-        res.json(result);
-    } catch (error) {
-        console.error('Error retrieving users:', error);
-        res.status(500).json({ message: 'Error retrieving users' });
-    }
-};
+
+// exports.getCategorySalesInfo = async (req, res) => {
+//     // todo
+//     try {
+//         const result = [
+//             { date: new Date(2024, 3, 1), close: 1000 },
+//             { date: new Date(2024, 4, 1), close: 500 },
+//             { date: new Date(2024, 5, 1), close: 170 },
+//             { date: new Date(2024, 6, 1), close: 170 },
+//             { date: new Date(2024, 7, 1), close: 170 },
+//         ];
+
+//         res.json(result);
+//     } catch (error) {
+//         console.error('Error retrieving users:', error);
+//         res.status(500).json({ message: 'Error retrieving users' });
+//     }
+// };

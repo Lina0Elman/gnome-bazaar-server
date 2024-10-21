@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema({
 userSchema.statics.getAllUsers = async function () {
     try {
         const users = await this.find().populate('cart');
-        console.log('Retrieved users:', users);
+        console.log('Retrieved users');
         return users;
     } catch (error) {
         throw new Error('Error retrieving users: ' + error.message);

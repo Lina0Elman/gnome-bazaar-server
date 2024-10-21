@@ -7,7 +7,6 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "test-me",
     "start": "node index.js"
   },
   "license": "ISC",

@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 app.use(`${config.app.baseName}/api/user`, authenticateToken, userRoutes);
 app.use(`${config.app.baseName}/api/products`, authenticateToken, productsRoutes);
 app.use(`${config.app.baseName}/api/supplier`, authenticateToken, supplierRoutes);
-app.use(`${config.app.baseName}/api/token`, authenticateToken, authRoutes);
+app.use(`${config.app.baseName}/api/token`, authRoutes);
 
 
 

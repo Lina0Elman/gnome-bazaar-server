@@ -3,11 +3,12 @@ const dotenv = require('dotenv');
 const { exec } = require('child_process');
 const bcrypt = require('bcrypt');
 const config = require('./config');
-const { v4: uuidv4 } = require('uuid');
 const { connectToDatabase } = require('./src/models/database');
 const User = require('./src/models/User');  // Import the User model
 const Product = require('./src/models/Product');  // Import the Product model
 const utils = require('./testDataUtils');
+const Purchase = require('./src/models/Purchase');  // Import the Product model
+
 
 // Initialize environment variables
 dotenv.config();
@@ -110,9 +111,9 @@ async function insertTestData() {
             description: `זה מוצר מסוג ${category}`,
             img: loadImageAsBuffer(utils.randomImage()),
             name: "מוצר" + " " + i,
-            price: utils.randomBetween(250, 600),
+            price: utils.randomBetween(20, 100),
             category: category,
-            quantity: utils.randomBetween(0, 10),
+            quantity: utils.randomBetween(1, 10),
             user: (await User.findOne({ userName: 'lina' }))._id
             };
             testProducts.push(product);
@@ -121,6 +122,44 @@ async function insertTestData() {
         // Insert test products
         await Product.insertMany(testProducts);
         console.log(`Inserted test products successfully.`);
+
+        // Get a user and a few products to create purchases
+        const user = await User.findOne({ userName: 'guest' });
+        const products = await Product.find().limit(5);
+
+        const testPurchases = [
+            {
+                user: user._id,
+                products: [
+                    { product: products[0]._id, quantity: 2, price: products[0].price },
+                    { product: products[1]._id, quantity: 1, price: products[1].price }
+                ],
+                purchaseDate: new Date(2024, 6, 15),  
+                totalCost: (products[0].price * 2) + (products[1].price * 1)
+            },
+            {
+                user: user._id,
+                products: [
+                    { product: products[0]._id, quantity: 3, price: products[0].price },
+                    { product: products[1]._id, quantity: 2, price: products[1].price }
+                ],
+                purchaseDate: new Date(2024, 7, 20),  
+                totalCost: (products[2].price * 3) + (products[3].price * 2)
+            },
+            {
+                user: user._id,
+                products: [
+                    { product: products[0]._id, quantity: 0, price: products[0].price },
+                    { product: products[1]._id, quantity: 1, price: products[1].price }
+                ],
+                purchaseDate: new Date(2024, 8, 20),  
+                totalCost: (products[2].price * 0) + (products[3].price * 1)
+            }
+        ];
+
+        // Insert the test purchases
+        await Purchase.insertMany(testPurchases);
+        console.log(`Inserted test purchases for March and August successfully.`);
 
     } catch (err) {
         console.error('Error inserting test data:', err);
