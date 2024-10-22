@@ -251,7 +251,7 @@ exports.removeFromCart = async (req, res) => {
         // Check if a specific quantity was provided
         if (quantity && quantity > 0) {
             // Decrease the quantity of the cart item
-            user.cart[cartItemIndex].quantity -= quantity;
+            user.cart[cartItemIndex].quantity --;
 
             // If the quantity is less than or equal to zero, remove the item from the cart
             if (user.cart[cartItemIndex].quantity <= 0) {
