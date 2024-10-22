@@ -34,16 +34,59 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.getAdminSalesInfo = async (req, res) => {
-    
-  const data = [
-    { date: new Date(2024, 3, 1), close: 1000 },
-    { date: new Date(2024, 4, 1), close: 500 },
-    { date: new Date(2024, 5, 1), close: 170 },
-    { date: new Date(2024, 6, 1), close: 170 },
-    { date: new Date(2024, 7, 1), close: 170 },
-  ];
+    try {
+        // Step 1: Aggregate sales information grouped by date
+        const salesInfo = await Purchase.aggregate([
+            // Unwind the products array so each product can be processed individually
+            { $unwind: "$products" },
 
-  res.status(StatusCodes.OK).json(data);
+            // Lookup the product details from the Product collection
+            {
+                $lookup: {
+                    from: "products", // Name of the Product collection
+                    localField: "products.product", // Field in Purchase
+                    foreignField: "_id", // Field in Product
+                    as: "productDetails" // Name of the array to hold the result
+                }
+            },
+
+            // Unwind the productDetails array to merge product info with the document
+            { $unwind: "$productDetails" },
+
+            // Group by the date and calculate total earnings for that date
+            {
+                $group: {
+                    _id: {
+                        date: {
+                            $dateToString: { format: "%Y-%m-%d", date: "$purchaseDate" } // Group by date in 'YYYY-MM-DD' format
+                        }
+                    },
+                    totalEarnings: { $sum: { $multiply: ["$products.quantity", { $toDouble: '$products.price' }] } } // Calculate total earnings
+                }
+            },
+
+            // Project the final result to include the 'date' and 'close' fields
+            {
+                $project: {
+                    _id: 0, // Exclude the _id field from the output
+                    date: "$_id.date", // Use the grouped date as 'date'
+                    close: "$totalEarnings" // Total earnings as 'close'
+                }
+            },
+
+            // Sort by date to maintain chronological order
+            { $sort: { date: 1 } }
+        ]);
+
+        if (!salesInfo || salesInfo.length === 0) {
+            return res.status(404).json({ message: 'No sales data found.' });
+        }
+
+        return res.status(200).json(salesInfo);
+    } catch (err) {
+        console.error('Error fetching sales info:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
 };
 
 // Controller to update a user

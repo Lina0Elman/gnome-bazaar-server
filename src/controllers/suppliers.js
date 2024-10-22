@@ -150,25 +150,3 @@ exports.getSalesInfo = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving sales info' });
     }
 };
-
-
-
-
-
-// exports.getCategorySalesInfo = async (req, res) => {
-//     // todo
-//     try {
-//         const result = [
-//             { date: new Date(2024, 3, 1), close: 1000 },
-//             { date: new Date(2024, 4, 1), close: 500 },
-//             { date: new Date(2024, 5, 1), close: 170 },
-//             { date: new Date(2024, 6, 1), close: 170 },
-//             { date: new Date(2024, 7, 1), close: 170 },
-//         ];
-
-//         res.json(result);
-//     } catch (error) {
-//         console.error('Error retrieving users:', error);
-//         res.status(500).json({ message: 'Error retrieving users' });
-//     }
-// };
