@@ -4,9 +4,6 @@ const userController = require('../controllers/user');
 const purchasesController = require('../controllers/purchases');
 const adminAuth = require('../middlewares/adminAuth');
 
-// Route to get all users
-router.get('/users', userController.getAllUsers);
-
 // Route to add a new user
 router.post('/register', userController.addUser);
 router.post('/update-user-profile', userController.updateUser);

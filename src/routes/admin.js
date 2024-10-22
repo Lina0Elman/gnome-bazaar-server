@@ -8,6 +8,9 @@ const adminAuth = require('../middlewares/adminAuth');
 router.use(adminAuth);
 
 // admin
+
+// Route to get all users
+router.get('/users', userController.getAllUsers);
 router.get('/admin-sales-info', userController.getAdminSalesInfo);
 router.post('/update-user-role', userController.updateUserRole);
 router.post('/send-user-credits', userController.sendCreditsToUser);
