@@ -88,6 +88,36 @@ async function insertTestData() {
                 cart: []
             },
             { 
+                userName: 'liav',
+                pwd: await bcrypt.hash('111', 10), // Hashing password
+                fullName: 'liav',
+                mail: 'liav@gmail.com',
+                phone: '053',
+                credits: 830,
+                role: 'Admin',
+                cart: []
+            },
+            { 
+                userName: 'elad',
+                pwd: await bcrypt.hash('222', 10), // Hashing password
+                fullName: 'elad',
+                mail: 'elad@gmail.com',
+                phone: '054',
+                credits: 330,
+                role: 'Admin',
+                cart: []
+            },
+            { 
+                userName: 'shir',
+                pwd: await bcrypt.hash('333', 10), // Hashing password
+                fullName: 'shir',
+                mail: 'shir@gmail.com',
+                phone: '055',
+                credits: 500,
+                role: 'Admin',
+                cart: []
+            },
+            { 
                 userName: 'guest',
                 pwd: await bcrypt.hash('guest', 10),
                 fullName: 'guest',
