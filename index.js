@@ -104,7 +104,7 @@ async function insertTestData() {
                 mail: 'elad@gmail.com',
                 phone: '054',
                 credits: 330,
-                role: 'Admin',
+                role: 'User',
                 cart: []
             },
             { 
@@ -114,7 +114,7 @@ async function insertTestData() {
                 mail: 'shir@gmail.com',
                 phone: '055',
                 credits: 500,
-                role: 'Admin',
+                role: 'User',
                 cart: []
             },
             { 
