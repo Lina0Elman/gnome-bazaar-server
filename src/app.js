@@ -23,16 +23,21 @@ app.use(bodyParser.json());
 
 
 // Exclude auth routes from authentication
-app.use(`${config.app.baseName}/api/token`, authRoutes);
+app.use(`${config.app.baseName}/token`, authRoutes);
 
-// Apply authenticateToken middleware to all other routes
-app.use(authenticateToken);
+// Apply middleware to all routes except specifics
+app.use((req, res, next) => {
+  if (req.path === `${config.app.baseName}/user/register`) {
+      return next(); // Skip middleware for this route
+  }
+  authenticateToken(req, res, next); // Apply middleware for all other routes
+});
 
 // with auth middleware
-app.use(`${config.app.baseName}/api/user`, userRoutes);
-app.use(`${config.app.baseName}/api/products`, productsRoutes);
-app.use(`${config.app.baseName}/api/supplier`, supplierRoutes);
-app.use(`${config.app.baseName}/api/admin`, adminRoutes);
+app.use(`${config.app.baseName}/user`, userRoutes);
+app.use(`${config.app.baseName}/products`, productsRoutes);
+app.use(`${config.app.baseName}/supplier`, supplierRoutes);
+app.use(`${config.app.baseName}/admin`, adminRoutes);
 
 
 
