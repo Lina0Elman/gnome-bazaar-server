@@ -5,6 +5,8 @@ college assignment - web development w node
 
 //todos
 
+- check if needed fix with post/put/fetch/get routes
+
 [ cookie check / token ]
 .24 המערכת תתמוך בלפחות שאילתה אחת המבצעת פעולת GroupBy ב MongoDB
 

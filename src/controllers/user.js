@@ -237,7 +237,7 @@ exports.getUserCategories = async (req, res) => {
 
 exports.addToCart = async (req, res) => {
     const userId = req.user.id; // Assuming you have a middleware that attaches the authenticated user to req.user
-    const { _id, quantity } = req.body;
+    const { _id } = req.body;
 
     try {
         // Find the product by ID
@@ -257,12 +257,18 @@ exports.addToCart = async (req, res) => {
         const cartItem = user.cart.find(item => item.product.toString() === _id);
 
         if (cartItem) {
+            // Check if adding one more would exceed the product's stock
+            if (cartItem.quantity >= product.quantity) {
+                return res.status(StatusCodes.BAD_REQUEST).json({ message: `Maximum available quantity for ${product.name} reached` });
+            }
+
             // If the product is already in the cart, update the quantity
-            cartItem.quantity = cartItem.quantity + 1;
+            cartItem.quantity += 1;
         } else {
-            // If the product is not in the cart, add it with the specified quantity
+            // If the product is not in the cart, add it with quantity 1
             user.cart.push({ product: _id, quantity: 1 });
         }
+
 
         // Save the updated user
         await user.save();

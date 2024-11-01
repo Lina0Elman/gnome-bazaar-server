@@ -21,7 +21,7 @@ const getProducts = async (req, res) => {
             return res.json(cachedProducts);
         }
 
-        const filter = {};
+        const filter = {quantity: { $gt: 0 }};
         if (productName) {
             filter.name = { $regex: new RegExp(productName, 'i') };  // Case-insensitive search
         }
@@ -85,4 +85,4 @@ const uploadSupplierProduct = async (req, res) => {
 
 
 
-module.exports = { getProducts, uploadSupplierProduct };
+module.exports = { getProducts, uploadSupplierProduct, productCache };

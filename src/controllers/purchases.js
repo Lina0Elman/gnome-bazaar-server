@@ -1,6 +1,8 @@
 const { StatusCodes } = require ('http-status-codes');const Purchase = require('../models/Purchase');
 const Product = require('../models/Product');
 const User = require('../models/User');
+const {productCache} = require('./products');
+
 
 const submitPurchase = async (req, res) => {
     const userId = req.user.id;  // Get user ID from the authenticated user (from JWT or session)
@@ -58,6 +60,7 @@ const submitPurchase = async (req, res) => {
 
         await purchase.save();
 
+        productCache.flushAll();
         // Send a success response
         res.status(StatusCodes.CREATED).json({ message: 'Purchase successful', purchase });
 
