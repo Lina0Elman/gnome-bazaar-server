@@ -12,6 +12,7 @@ const adminRoutes = require('./routes/admin');
 const { authenticateToken } = require('./middlewares/auth');
 
 const app = express();
+const baseRoute = `${config.app.baseName}/api`
 
 // Increase the size limit for JSON and URL-encoded data
 app.use(express.json({ limit: '5mb' })); // Set limit as per your need (e.g., 10MB)
@@ -23,21 +24,21 @@ app.use(bodyParser.json());
 
 
 // Exclude auth routes from authentication
-app.use(`${config.app.baseName}/token`, authRoutes);
+app.use(`${baseRoute}/token`, authRoutes);
 
 // Apply middleware to all routes except specifics
 app.use((req, res, next) => {
-  if (req.path === `${config.app.baseName}/user/register`) {
+  if (req.path === `${baseRoute}/user/register`) {
       return next(); // Skip middleware for this route
   }
   authenticateToken(req, res, next); // Apply middleware for all other routes
 });
 
 // with auth middleware
-app.use(`${config.app.baseName}/user`, userRoutes);
-app.use(`${config.app.baseName}/products`, productsRoutes);
-app.use(`${config.app.baseName}/supplier`, supplierRoutes);
-app.use(`${config.app.baseName}/admin`, adminRoutes);
+app.use(`${baseRoute}/user`, userRoutes);
+app.use(`${baseRoute}/products`, productsRoutes);
+app.use(`${baseRoute}/supplier`, supplierRoutes);
+app.use(`${baseRoute}/admin`, adminRoutes);
 
 
 
