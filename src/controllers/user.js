@@ -191,10 +191,13 @@ exports.getUserPurchases = async (req, res) => {
             date: purchase.purchaseDate,
             products: purchase.products.map(item => ({
                 product: {
-                    productId: item.product._id,
-                    productName: item.product.name, 
-                    quantity: item.quantity,
-                    price: parseFloat(item.price.toString())
+                    id: item.product._id,
+                    name: item.product.name, 
+                    quantity: item.product.quantity,
+                    price: parseFloat(item.product.price.toString()),
+                    description: item.product.description,
+                    img: item.product.img? `data:image/webp;base64,${item.product.img.toString('base64')}` : null,
+                    category: item.product.category
                 },
                 quantity: item.quantity
             })),
