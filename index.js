@@ -179,8 +179,8 @@ async function insertTestData() {
             {
                 user: user._id,
                 products: [
-                    { product: products[0]._id, quantity: 0, price: products[0].price },
-                    { product: products[1]._id, quantity: 1, price: products[1].price }
+                    { product: products[2]._id, quantity: 0, price: products[2].price },
+                    { product: products[3]._id, quantity: 1, price: products[3].price }
                 ],
                 purchaseDate: new Date(2024, 8, 20),  
                 totalCost: (products[2].price * 0) + (products[3].price * 1)
@@ -189,7 +189,7 @@ async function insertTestData() {
 
         // Insert the test purchases
         await Purchase.insertMany(testPurchases);
-        console.log(`Inserted test purchases for March and August successfully.`);
+        console.log(`Inserted test purchases successfully.`);
 
     } catch (err) {
         console.error('Error inserting test data:', err);

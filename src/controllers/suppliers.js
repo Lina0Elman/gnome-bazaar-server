@@ -1,58 +1,59 @@
 const Product = require('../models/Product');
-const mongoose = require('mongoose');
 const Purchase = require('../models/Purchase');
+const mongoose = require('mongoose');
 
-
-// Controller to get category sales info grouped by month
 exports.getCategorySalesInfo = async (req, res) => {
     const userId = req.user.id; // Assuming supplier user ID is available through authentication
 
     try {
-        // Step 1: Find all products belonging to the supplier (user)
-        const supplierProducts = await Product.find({ user: userId }).select('_id');
+        // Step 1: Fetch all supplier's products with categories
+        const supplierProducts = await Product.find({ user: userId }).select('_id category');
+        
+        // Create a product-to-category map
+        const productCategoryMap = supplierProducts.reduce((acc, product) => {
+            acc[product._id.toString()] = product.category;
+            return acc;
+        }, {});
 
-        // Step 2: Get the product IDs to filter purchases
-        const productIds = supplierProducts.map(product => product._id);
+        const productIds = Object.keys(productCategoryMap).map(id => new mongoose.Types.ObjectId(id));
 
-        // Step 3: Aggregate purchases grouped by month and calculate total earnings
+        // Step 2: Aggregate purchases by category and calculate total product quantities per category
         const salesInfo = await Purchase.aggregate([
             {
-                $match: {
-                    'products.product': { $in: productIds }  // Only purchases of supplier's products
-                }
+                $unwind: '$products' // Expand products array
             },
             {
-                $unwind: '$products' // Deconstruct the products array
+                $match: {
+                    'products.product': { $in: productIds } // Only include supplier's products
+                }
             },
             {
                 $group: {
-                    _id: {
-                        year: { $year: '$purchaseDate' },
-                        month: { $month: '$purchaseDate' }
-                    },
-                    totalEarnings: {
-                        $sum: { $multiply: ['$products.price', '$products.quantity'] } // Calculate earnings
-                    }
+                    _id: '$products.product', // Group by product ID
+                    productCount: { $sum: '$products.quantity' } // Count quantities for each product
                 }
-            },
-            {
-                $sort: { '_id.year': 1, '_id.month': 1 } // Sort by year and month
             }
         ]);
 
-        // Step 4: Format the result into the desired structure
-        const result = salesInfo.map(info => ({
-            date: new Date(info._id.year, info._id.month - 1, 1), // JavaScript months are 0-indexed
-            close: info.totalEarnings
+        // Step 3: Map the product IDs back to categories
+        const categoryCounts = salesInfo.reduce((acc, { _id, productCount }) => {
+            const category = productCategoryMap[_id.toString()];
+            acc[category] = (acc[category] || 0) + productCount;
+            return acc;
+        }, {});
+
+        // Format the response
+        const result = Object.entries(categoryCounts).map(([category, count]) => ({
+            label: category,
+            value: count
         }));
 
         res.json(result);
     } catch (error) {
         console.error('Error retrieving category sales info:', error);
-        res.status(500).json({ message: 'Error retrieving sales info' });
+        res.status(500).json({ message: 'Error retrieving category sales info' });
     }
 };
-
 
 // Controller function to get supplier products by user
 exports.getSupplierProducts = async (req, res) => {
