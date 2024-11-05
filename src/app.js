@@ -9,6 +9,7 @@ const productsRoutes = require('./routes/products');
 const authRoutes = require('./routes/auth');
 const supplierRoutes = require('./routes/supplier');
 const adminRoutes = require('./routes/admin');
+const categoriesRoutes = require('./routes/categories');
 const { authenticateToken } = require('./middlewares/auth');
 
 const app = express();
@@ -38,6 +39,7 @@ app.use((req, res, next) => {
 app.use(`${baseRoute}/user`, userRoutes);
 app.use(`${baseRoute}/products`, productsRoutes);
 app.use(`${baseRoute}/supplier`, supplierRoutes);
+app.use(`${baseRoute}/categories`, categoriesRoutes);
 app.use(`${baseRoute}/admin`, adminRoutes);
 
 

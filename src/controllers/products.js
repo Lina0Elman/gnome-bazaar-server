@@ -91,4 +91,21 @@ const uploadSupplierProduct = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, uploadSupplierProduct, productCache };
+const getCategories = async (req, res) => {
+  try {
+    // Fetch distinct categories from the products collection
+    const categories = await Product.distinct("category");
+
+    if (!categories.length) {
+      return res.status(200).json([]);
+    }
+
+    // Send the categories as a JSON response
+    res.json(categories);
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = { getProducts, uploadSupplierProduct, productCache, getCategories };
