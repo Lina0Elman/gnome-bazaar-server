@@ -213,17 +213,28 @@ exports.getUserPurchases = async (req, res) => {
 
 
 exports.getUserCategories = async (req, res) => {
-    const userId = req.params.id; // Assuming user ID is available through authentication
+    const userId = req.user.id; // Assuming user ID is available through authentication
 
     try {
         // Find purchases by the user and populate the product details
-        const purchases = await Purchase.find({ user: userId }).populate('product');
+        const purchases = await Purchase.find({ user: userId }).populate('products.product');
         if (!purchases.length) {
             return res.status(StatusCodes.NO_CONTENT).json({ message: 'No purchases found' });
         }
 
-        // Extract unique categories from the purchased products
-        const categories = [...new Set(purchases.map(purchase => purchase.product.category))];
+        // Group products by their categories and count the quantities
+        const categoryCounts = purchases.flatMap(purchase => purchase.products)
+            .reduce((acc, item) => {
+                const category = item.product.category;
+                if (!acc[category]) {
+                    acc[category] = 0;
+                }
+                acc[category] += item.quantity;
+                return acc;
+            }, {});
+
+        // Transform the result into the required format
+        const categories = Object.entries(categoryCounts).map(([title, value]) => ({ title, value }));
 
         res.status(StatusCodes.OK).json({ categories });
     } catch (err) {
