@@ -37,7 +37,7 @@ const getProducts = async (req, res) => {
       .exec();
 
     if (!products.length) {
-      return res.status(200).json({ message: "No products found" });
+      return res.status(200).json([]);
     }
 
     // Convert image buffers to base64
