@@ -356,7 +356,8 @@ exports.getUserCartProducts = async (req, res) => {
 
 // Update User Role
 exports.updateUserRole = async (req, res) => {
-    const { userId, newRole } = req.body;
+    const { user: req_user, newRole } = req.body;
+    const userId = req_user.id;
 
     if (!userId || !newRole) {
         return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Missing required fields' });
