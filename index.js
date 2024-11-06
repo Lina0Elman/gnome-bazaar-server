@@ -77,7 +77,7 @@ async function insertTestData() {
         await connectToDatabase();
 
         const testData = [
-            { 
+            {
                 userName: 'lina',
                 pwd: await bcrypt.hash('123', 10), // Hashing password
                 fullName: 'lina',
@@ -85,9 +85,13 @@ async function insertTestData() {
                 phone: '0585529305',
                 credits: 830,
                 role: 'Admin',
+                address: {
+                    type: 'Point',
+                    coordinates: [34.781768, 32.085300] // Tel Aviv
+                },
                 cart: []
             },
-            { 
+            {
                 userName: 'liav',
                 pwd: await bcrypt.hash('111', 10), // Hashing password
                 fullName: 'liav',
@@ -95,9 +99,13 @@ async function insertTestData() {
                 phone: '0525992484',
                 credits: 830,
                 role: 'Admin',
+                address: {
+                    type: 'Point',
+                    coordinates: [34.851612, 32.109333] // Herzliya
+                },
                 cart: []
             },
-            { 
+            {
                 userName: 'elad',
                 pwd: await bcrypt.hash('222', 10), // Hashing password
                 fullName: 'elad',
@@ -105,9 +113,13 @@ async function insertTestData() {
                 phone: '0547137713',
                 credits: 330,
                 role: 'User',
+                address: {
+                    type: 'Point',
+                    coordinates: [34.823456, 32.083333] // Ramat Gan
+                },
                 cart: []
             },
-            { 
+            {
                 userName: 'shir',
                 pwd: await bcrypt.hash('333', 10), // Hashing password
                 fullName: 'shir',
@@ -115,9 +127,13 @@ async function insertTestData() {
                 phone: '0503403413',
                 credits: 500,
                 role: 'User',
+                address: {
+                    type: 'Point',
+                    coordinates: [34.811272, 32.085300] // Givatayim
+                },
                 cart: []
             },
-            { 
+            {
                 userName: 'guest',
                 pwd: await bcrypt.hash('guest', 10),
                 fullName: 'guest',
@@ -125,6 +141,10 @@ async function insertTestData() {
                 phone: '053',
                 credits: 200,
                 role: 'Supplier',
+                address: {
+                    type: 'Point',
+                    coordinates: [34.780527, 32.066158] // Bat Yam
+                },
                 cart: []
             }
         ];

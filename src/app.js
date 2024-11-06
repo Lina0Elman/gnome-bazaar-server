@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const supplierRoutes = require('./routes/supplier');
 const adminRoutes = require('./routes/admin');
 const categoriesRoutes = require('./routes/categories');
+const utilitiesRoutes = require('./routes/utilities');
 const { authenticateToken } = require('./middlewares/auth');
 
 const app = express();
@@ -26,6 +27,7 @@ app.use(bodyParser.json());
 
 // Exclude auth routes from authentication
 app.use(`${baseRoute}/token`, authRoutes);
+app.use(`${baseRoute}/utilities`, utilitiesRoutes);
 
 // Apply middleware to all routes except specifics
 app.use((req, res, next) => {
@@ -41,6 +43,7 @@ app.use(`${baseRoute}/products`, productsRoutes);
 app.use(`${baseRoute}/supplier`, supplierRoutes);
 app.use(`${baseRoute}/categories`, categoriesRoutes);
 app.use(`${baseRoute}/admin`, adminRoutes);
+
 
 
 
