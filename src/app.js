@@ -14,7 +14,7 @@ const utilitiesRoutes = require('./routes/utilities');
 const { authenticateToken } = require('./middlewares/auth');
 
 const app = express();
-const baseRoute = `${config.app.baseName}/api`
+const baseRoute = `${config.app.baseName}/api`;
 
 // Increase the size limit for JSON and URL-encoded data
 app.use(express.json({ limit: '5mb' })); // Set limit as per your need (e.g., 10MB)
@@ -24,6 +24,10 @@ app.use(express.urlencoded({ limit: '5mb', extended: true })); // For URL-encode
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 
+// TODO - move from here
+app.get(`${baseRoute}/intro`, async (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "assets", "intro.mp4"));
+});
 
 // Exclude auth routes from authentication
 app.use(`${baseRoute}/token`, authRoutes);
@@ -32,7 +36,7 @@ app.use(`${baseRoute}/utilities`, utilitiesRoutes);
 // Apply middleware to all routes except specifics
 app.use((req, res, next) => {
   if (req.path === `${baseRoute}/user/register`) {
-      return next(); // Skip middleware for this route
+    return next(); // Skip middleware for this route
   }
   authenticateToken(req, res, next); // Apply middleware for all other routes
 });
@@ -44,12 +48,7 @@ app.use(`${baseRoute}/supplier`, supplierRoutes);
 app.use(`${baseRoute}/categories`, categoriesRoutes);
 app.use(`${baseRoute}/admin`, adminRoutes);
 
-
-
-
-
 // app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' folder
-
 
 app.use(cors({ origin: "*" }));
 app.use((req, res, next) => {
@@ -58,6 +57,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// TODO - move from here
 app.get(`${baseRoute}/get-weather`, async (req, res) => {
   try {
     const weatherKey = process.env.WEATHER_API;
@@ -71,28 +71,24 @@ app.get(`${baseRoute}/get-weather`, async (req, res) => {
     res.status(500).json("לא זמין כרגע...");
   }
 });
+// TODO - move from here
 app.get(`/image-repo/:img`, async (req, res) => {
   const { img } = req.params;
   console.log(img);
 
-  res.sendFile(path.join(__dirname, "public", 'assets', img));
+  res.sendFile(path.join(__dirname, "public", "assets", img));
 });
 
 app.get(`${config.app.baseName}/404`, (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
-
-
 app.get(config.app.baseName, (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
-
 // todo move client to dist under src :)
 // app.use(express.static(path.join(__dirname, "dist")));
-
-
 
 app.get(`${config.app.baseName}/*`, (req, res, next) => {
   const requestPath = req.path.replace(config.app.baseName, "");
@@ -109,19 +105,14 @@ app.get(`${config.app.baseName}/*`, (req, res, next) => {
   }
 });
 
-
 app.use((req, res) => {
   res.redirect(`${config.app.baseName}/404`);
 });
 
-
-
 // Error handling middleware (optional) -- move to middlewares
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+  console.error(err.stack);
+  res.status(500).send("Something broke!");
 });
-
-
 
 module.exports = app;
