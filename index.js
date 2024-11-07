@@ -82,7 +82,7 @@ async function insertTestData() {
                 pwd: await bcrypt.hash('123', 10), // Hashing password
                 fullName: 'lina',
                 mail: 'linlin@gmail.com',
-                phone: '052',
+                phone: '0585529305',
                 credits: 830,
                 role: 'Admin',
                 cart: []
@@ -92,7 +92,7 @@ async function insertTestData() {
                 pwd: await bcrypt.hash('111', 10), // Hashing password
                 fullName: 'liav',
                 mail: 'liav@gmail.com',
-                phone: '053',
+                phone: '0525992484',
                 credits: 830,
                 role: 'Admin',
                 cart: []
@@ -102,7 +102,7 @@ async function insertTestData() {
                 pwd: await bcrypt.hash('222', 10), // Hashing password
                 fullName: 'elad',
                 mail: 'elad@gmail.com',
-                phone: '054',
+                phone: '0547137713',
                 credits: 330,
                 role: 'User',
                 cart: []
@@ -112,7 +112,7 @@ async function insertTestData() {
                 pwd: await bcrypt.hash('333', 10), // Hashing password
                 fullName: 'shir',
                 mail: 'shir@gmail.com',
-                phone: '055',
+                phone: '0503403413',
                 credits: 500,
                 role: 'User',
                 cart: []
@@ -134,10 +134,10 @@ async function insertTestData() {
         console.log(`Inserted test users successfully.`);
 
         const testProducts = [];
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 30; i++) {
             const category = utils.randomCategory();
             const product = {
-            id: i.toString(),
+            id: i.toString(), 
             description: `זה מוצר מסוג ${category}`,
             img: loadImageAsBuffer(utils.randomImage()),
             name: "מוצר" + " " + i,
