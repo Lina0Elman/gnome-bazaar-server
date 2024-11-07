@@ -58,6 +58,19 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get(`${baseRoute}/get-weather`, async (req, res) => {
+  try {
+    const weatherKey = process.env.WEATHER_API;
+    const response = await fetch(
+      `http://api.weatherapi.com/v1/current.json?key=${weatherKey}&q=israel&aqi=yes`
+    );
+    const data = await response.json();
+    const temp_c = data?.current?.temp_c || "לא זמין כרגע...";
+    res.json(temp_c);
+  } catch {
+    res.status(500).json("לא זמין כרגע...");
+  }
+});
 app.get(`/image-repo/:img`, async (req, res) => {
   const { img } = req.params;
   console.log(img);
