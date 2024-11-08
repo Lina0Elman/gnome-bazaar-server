@@ -1,7 +1,8 @@
 // models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const Product = require('../models/Product'); // Adjust the path as necessary
+const Product = require('../models/Product');
+const roleUtils = require("../utils/roleUtils"); // Adjust the path as necessary
 
 
 // Cart item schema to store product reference and quantity
@@ -16,6 +17,27 @@ const cartItemSchema = new mongoose.Schema({
 }, { _id: false }); // Disable auto-generated _id for cart items
 
 
+const pointSchema = new mongoose.Schema({
+    type: {
+        type: mongoose.Schema.Types.String,
+        enum: ['Point'],
+        required: true
+    },
+    coordinates: {
+        type: [mongoose.Schema.Types.Number],
+        required: true,
+        validate: {
+            validator: function (value) {
+                return value.length === 2 &&
+                    value[0] >= -180 && value[0] <= 180 &&  // Longitude
+                    value[1] >= -90 && value[1] <= 90;     // Latitude
+            },
+            message: props => `${props.value} is not a valid coordinate pair!`
+        }
+    }
+});
+
+
 const userSchema = new mongoose.Schema({
     userName: { type: mongoose.Schema.Types.String, required: true },
     pwd: { type: mongoose.Schema.Types.String, required: true },
@@ -23,7 +45,12 @@ const userSchema = new mongoose.Schema({
     fullName: { type: mongoose.Schema.Types.String, required: true },
     phone: { type: mongoose.Schema.Types.String, required: true },
     credits: { type: mongoose.Schema.Types.Decimal128, default: 0 },
-    role: { type: mongoose.Schema.Types.String, required: true },
+    role: {
+            type: mongoose.Schema.Types.String,
+            enum: ['Supplier', 'User', 'Admin'],
+            required: true
+    },
+    address: { type: pointSchema, required: true },
     cart: [cartItemSchema]
 }, {
     toJSON: {
@@ -35,7 +62,6 @@ const userSchema = new mongoose.Schema({
             if (ret.credits instanceof mongoose.Types.Decimal128) {
                 ret.credits = parseFloat(ret.credits.toString());
             }
-
             return ret;
         }
     }
@@ -124,6 +150,19 @@ userSchema.statics.addProductToCart = async function (userId, productId) {
         return user;
     } catch (error) {
         throw new Error('Error adding product to cart: ' + error.message);
+    }
+};
+
+userSchema.statics.getSuppliersLocations = async function () {
+    try {
+       const suppliers = await this.find({ role: { $in: roleUtils.getSupplierRoles() } }, { fullName: 1, address: 1 });
+        return suppliers.map(supplier => ({
+            name: supplier.fullName,
+            latitude: supplier.address.coordinates[1],
+            longitude: supplier.address.coordinates[0]
+        }));
+    } catch (error) {
+        throw new Error('Error retrieving supplier locations: ' + error.message);
     }
 };
 

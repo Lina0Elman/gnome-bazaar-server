@@ -113,7 +113,7 @@ exports.updateUser = async (req, res) => {
 
 // Controller to add a new user
 exports.addUser = async (req, res) => {
-    const { userName, pwd, fullName, mail, phone, credits, role } = req.body;
+    const { userName, pwd, fullName, mail, phone, credits, role, address } = req.body;
 
     try {
         if (!isRoleValid(role)) {
@@ -130,6 +130,10 @@ exports.addUser = async (req, res) => {
             phone,
             credits: credits || 0,
             role,
+            address: {
+                type: 'Point',
+                coordinates: [address.longitude, address.latitude]
+            }
         };
 
         const user = await User.addUser(userData);
@@ -213,17 +217,28 @@ exports.getUserPurchases = async (req, res) => {
 
 
 exports.getUserCategories = async (req, res) => {
-    const userId = req.params.id; // Assuming user ID is available through authentication
+    const userId = req.user.id; // Assuming user ID is available through authentication
 
     try {
         // Find purchases by the user and populate the product details
-        const purchases = await Purchase.find({ user: userId }).populate('product');
+        const purchases = await Purchase.find({ user: userId }).populate('products.product');
         if (!purchases.length) {
             return res.status(StatusCodes.NO_CONTENT).json({ message: 'No purchases found' });
         }
 
-        // Extract unique categories from the purchased products
-        const categories = [...new Set(purchases.map(purchase => purchase.product.category))];
+        // Group products by their categories and count the quantities
+        const categoryCounts = purchases.flatMap(purchase => purchase.products)
+            .reduce((acc, item) => {
+                const category = item.product.category;
+                if (!acc[category]) {
+                    acc[category] = 0;
+                }
+                acc[category] += item.quantity;
+                return acc;
+            }, {});
+
+        // Transform the result into the required format
+        const categories = Object.entries(categoryCounts).map(([title, value]) => ({ title, value }));
 
         res.status(StatusCodes.OK).json({ categories });
     } catch (err) {
@@ -356,7 +371,8 @@ exports.getUserCartProducts = async (req, res) => {
 
 // Update User Role
 exports.updateUserRole = async (req, res) => {
-    const { userId, newRole } = req.body;
+    const { user: req_user, newRole } = req.body;
+    const userId = req_user.id;
 
     if (!userId || !newRole) {
         return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Missing required fields' });
@@ -409,3 +425,4 @@ exports.sendCreditsToUser = async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
     }
 };
+

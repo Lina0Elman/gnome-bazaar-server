@@ -1,6 +1,8 @@
 const Product = require('../models/Product');
 const Purchase = require('../models/Purchase');
 const mongoose = require('mongoose');
+const User = require("../models/User");
+const {StatusCodes} = require("http-status-codes");
 
 exports.getCategorySalesInfo = async (req, res) => {
     const userId = req.user.id; // Assuming supplier user ID is available through authentication
@@ -149,5 +151,15 @@ exports.getSalesInfo = async (req, res) => {
     } catch (error) {
         console.error('Error retrieving sales info:', error);
         res.status(500).json({ message: 'Error retrieving sales info' });
+    }
+};
+
+exports.getSupplierLocations = async (req, res) => {
+    try {
+        const locations = await User.getSuppliersLocations();
+        res.json(locations);
+    } catch (error) {
+        console.error('Error retrieving supplier locations:', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error retrieving supplier locations' });
     }
 };
