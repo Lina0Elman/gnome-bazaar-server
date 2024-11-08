@@ -6,6 +6,7 @@ const Purchase = require('../models/Purchase'); // Adjust the path as necessary
 const Product = require('../models/Product'); // Adjust the path as necessary
 const mongoose = require("mongoose");
 const {isRoleValid} = require("../utils/roleUtils");
+const roles = require("../utils/consts");
 
 
 // Controller to get all users
@@ -113,12 +114,9 @@ exports.updateUser = async (req, res) => {
 
 // Controller to add a new user
 exports.addUser = async (req, res) => {
-    const { userName, pwd, fullName, mail, phone, credits, role, address } = req.body;
+    const { userName, pwd, fullName, mail, phone, credits, address } = req.body;
 
     try {
-        if (!isRoleValid(role)) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid role' });
-        }
 
         const hashedPassword = await bcrypt.hash(pwd, 10); // Hash the password
 
@@ -129,7 +127,7 @@ exports.addUser = async (req, res) => {
             mail,
             phone,
             credits: credits || 0,
-            role,
+            role: roles.User.name,
             address: {
                 type: 'Point',
                 coordinates: [address.longitude, address.latitude]

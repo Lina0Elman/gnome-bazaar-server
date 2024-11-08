@@ -6,7 +6,8 @@ const adminAuth = require('../middlewares/adminAuth');
 
 // Route to add a new user
 router.post('/register', userController.addUser);
-router.post('/update-user-profile', userController.updateUser);
+router.post('/update-user-profile', adminAuth, userController.updateUser);
+
 
 // Specific routes for categories and expenses (place these before the dynamic route)
 router.get('/user-categories', userController.getUserCategories);
