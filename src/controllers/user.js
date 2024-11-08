@@ -238,7 +238,7 @@ exports.getUserCategories = async (req, res) => {
         // Transform the result into the required format
         const categories = Object.entries(categoryCounts).map(([title, value]) => ({ title, value }));
 
-        res.status(StatusCodes.OK).json({ categories });
+        res.status(StatusCodes.OK).json( categories );
     } catch (err) {
         console.error('Error fetching user categories:', err);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
