@@ -11,6 +11,7 @@ const supplierRoutes = require('./routes/supplier');
 const adminRoutes = require('./routes/admin');
 const categoriesRoutes = require('./routes/categories');
 const utilitiesRoutes = require('./routes/utilities');
+const externalServicesRoutes = require('./routes/external-services');
 const { authenticateToken } = require('./middlewares/auth');
 
 const app = express();
@@ -46,6 +47,7 @@ app.use(`${baseRoute}/user`, userRoutes);
 app.use(`${baseRoute}/products`, productsRoutes);
 app.use(`${baseRoute}/supplier`, supplierRoutes);
 app.use(`${baseRoute}/categories`, categoriesRoutes);
+app.use(`${baseRoute}/external-services`, externalServicesRoutes);
 app.use(`${baseRoute}/admin`, adminRoutes);
 
 // app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' folder
@@ -57,21 +59,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// TODO - move from here
-app.get(`${baseRoute}/get-weather`, async (req, res) => {
-  try {
-    const weatherKey = config.weatherApiKey;
-    const response = await fetch(
-      `http://api.weatherapi.com/v1/current.json?key=${weatherKey}&q=israel&aqi=yes`
-    );
-    const data = await response.json();
-    const temp_c = data?.current?.temp_c || "לא זמין כרגע...";
-    res.json(temp_c);
-  } catch {
-    res.status(500).json("לא זמין כרגע...");
-  }
-});
-// TODO - move from here
+
 app.get(`/image-repo/:img`, async (req, res) => {
   const { img } = req.params;
   console.log(img);
