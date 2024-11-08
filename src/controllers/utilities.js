@@ -1,4 +1,5 @@
 const axios = require('axios');
+const config = require("../../config");
 
 exports.getAddress = async (req, res) => {
     const { address: q } = req.query;
@@ -32,3 +33,17 @@ exports.getAddress = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
+
+exports.getWeather = async (req, res) => {
+    try {
+        const weatherKey = config.weatherApiKey;
+        const response = await fetch(
+            `http://api.weatherapi.com/v1/current.json?key=${weatherKey}&q=israel&aqi=yes`
+        );
+        const data = await response.json();
+        const temp_c = data?.current?.temp_c || "לא זמין כרגע...";
+        res.json(temp_c);
+    } catch {
+        res.status(500).json("לא זמין כרגע...");
+    }
+}
