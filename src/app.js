@@ -60,7 +60,7 @@ app.use((req, res, next) => {
 // TODO - move from here
 app.get(`${baseRoute}/get-weather`, async (req, res) => {
   try {
-    const weatherKey = process.env.WEATHER_API;
+    const weatherKey = config.weatherApiKey;
     const response = await fetch(
       `http://api.weatherapi.com/v1/current.json?key=${weatherKey}&q=israel&aqi=yes`
     );
