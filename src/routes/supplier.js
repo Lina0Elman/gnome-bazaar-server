@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const supplierController = require('../controllers/suppliers');
-const {authenticateToken} = require('../middlewares/auth');
-
 
 
 router.get('/supplier-sales-info', supplierController.getSalesInfo);
