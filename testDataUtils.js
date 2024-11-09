@@ -33,7 +33,51 @@ const randomDate = () => {
   return new Date(year, month, date);
 };
 
-const categories = ["Accessories", "Gnome", "Hat", "Pants", "Shirt", "Shoes"];
+
+const hats = [
+  "Hat1.webp",
+  "Hat2.webp",
+  "Hat3.webp",
+  "Hat4.webp",
+  "Hat5.webp"
+];
+const accessories = [
+  "magicWand1.webp",
+  "magicWand2.webp",
+  "magicWand3.webp",
+  "magicWand4.webp",
+  "magicWand5.webp",
+  "acc1.jpeg",
+  "acc2.jpeg",
+  "acc3.jpeg",
+  "acc4.jpeg",
+  "Scarf1.webp",
+  "Scarf2.webp",
+  "Scarf3.webp",
+  "Scarf4.webp",
+  "Scarf5.webp"
+];
+const pants = [
+  "Pants1.webp",
+  "Pants2.webp",
+  "Pants3.webp",
+  "Pants4.webp",
+  "Pants5.webp"
+];
+const shirts = [
+  "Shirt1.webp",
+  "Shirt2.webp",
+  "Shirt3.webp",
+  "Shirt4.webp",
+  "Shirt5.webp"
+];
+const shoes = [
+  "Shoes1.webp",
+  "Shoes2.webp",
+  "Shoes3.webp",
+  "Shoes4.webp",
+  "Shoes5.webp"
+];
 
 const gnomes = [
   "gnome1.webp",
@@ -51,48 +95,33 @@ const gnomes = [
   "Beard3.webp",
   "Beard4.webp",
   "Beard5.webp",
-  "Hat1.webp",
-  "Hat2.webp",
-  "Hat3.webp",
-  "Hat4.webp",
-  "Hat5.webp",
-  "magicWand1.webp",
-  "magicWand2.webp",
-  "magicWand3.webp",
-  "magicWand4.webp",
-  "magicWand5.webp",
-  "Pants1.webp",
-  "Pants2.webp",
-  "Pants3.webp",
-  "Pants4.webp",
-  "Pants5.webp",
-  "Scarf1.webp",
-  "Scarf2.webp",
-  "Scarf3.webp",
-  "Scarf4.webp",
-  "Scarf5.webp",
-  "Shirt1.webp",
-  "Shirt2.webp",
-  "Shirt3.webp",
-  "Shirt4.webp",
-  "Shirt5.webp",
-  "Shoes1.webp",
-  "Shoes2.webp",
-  "Shoes3.webp",
-  "Shoes4.webp",
-  "Shoes5.webp",
-  "acc1.jpeg",
-  "acc2.jpeg",
-  "acc3.jpeg",
-  "acc4.jpeg",
-  "acc5.jpeg",
-  "acc6.jpeg",
-  "acc7.jpeg",
-  "acc8.jpeg",
+  "Gnome11.jpeg",
+  "Gnome12.jpeg",
+  "Gnome13.jpeg",
+  "Gnome14.jpeg"
 ];
 
-const randomImage = () => {
-  return `./src/public/assets/${gnomes[randomBetween(0, gnomes.length - 1)]}`;
+const categories = ["Accessories", "Gnome", "Hat", "Pants", "Shirt", "Shoes"];
+
+const randomImage = (category) => {
+  if (category == "Gnome") {
+    return `./src/public/assets/${gnomes[randomBetween(0, gnomes.length - 1)]}`;
+  }
+  if (category == "Hat") {
+    return `./src/public/assets/${hats[randomBetween(0, hats.length - 1)]}`;
+  }
+  if (category == "Accessories") {
+    return `./src/public/assets/${accessories[randomBetween(0, accessories.length - 1)]}`;
+  }
+  if (category == "Pants") {
+    return `./src/public/assets/${pants[randomBetween(0, pants.length - 1)]}`;
+  }
+  if (category == "Shoes") {
+    return `./src/public/assets/${shoes[randomBetween(0, shoes.length - 1)]}`;
+  }
+  if (category == "Shirt") {
+    return `./src/public/assets/${shirts[randomBetween(0, shirts.length - 1)]}`;
+  }
 };
 
 module.exports = {

@@ -159,7 +159,7 @@ async function insertTestData() {
             const product = {
             id: i.toString(), 
             description: `זה מוצר מסוג ${category}`,
-            img: loadImageAsBuffer(utils.randomImage()),
+            img: loadImageAsBuffer(utils.randomImage(category)),
             name: "מוצר" + " " + i,
             price: utils.randomBetween(20, 100),
             category: category,
