@@ -538,8 +538,10 @@ exports.getMediaFollowers = async (req, res) => {
 
     // Send the response with the followers count
     res.json(followersCount);
-    res.status(StatusCodes.OK).json(0);
   } catch (e) {
-    res.status(StatusCodes.TOO_MANY_REQUESTS).end();
+    console.error(e);
+    res
+      .status(StatusCodes.TOO_MANY_REQUESTS)
+      .json({ message: "Too many requests to twitter api" });
   }
 };
