@@ -8,12 +8,10 @@ const productCache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
 // Controller function to get supplier products
 const getProducts = async (req, res) => {
   try {
-    const { productName, category, skip = 0, take = 10 } = req.query; // Build the filter object based on the provided query parameters
+    const { productName, category, skip = 0, take = 10, minPrice = 0, maxPrice = 1000 } = req.query; // Build the filter object based on the provided query parameters
 
     // Create a unique cache key based on query parameters
-    const cacheKey = `products_${productName || ""}_${
-      category || ""
-    }_${skip}_${take}`;
+    const cacheKey = `products_${productName || ""}_${category || ""}_${minPrice || ""}_${maxPrice || ""}_${skip}_${take}`;
 
     // Check if data is already cached
     if (productCache.has(cacheKey)) {
@@ -28,6 +26,12 @@ const getProducts = async (req, res) => {
     }
     if (category) {
       filter.category = category;
+    }
+    if (minPrice) {
+      filter.price = { ...filter.price, $gte: parseFloat(minPrice) }; // Minimum price filter
+    }
+    if (maxPrice) {
+      filter.price = { ...filter.price, $lte: parseFloat(maxPrice) }; // Maximum price filter
     }
 
     // Fetch filtered and paginated products from the database
