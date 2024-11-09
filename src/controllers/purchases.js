@@ -6,6 +6,10 @@ const {productCache} = require('./products');
 
 const submitPurchase = async (req, res) => {
     const userId = req.user.id;  // Get user ID from the authenticated user (from JWT or session)
+    const {signature} = req.body;
+
+        // Convert base64 to binary
+    const signatureBuffer = Buffer.from(signature.split(",")[1], "base64");
 
     try {
         // Find the user and populate the cart
@@ -55,7 +59,8 @@ const submitPurchase = async (req, res) => {
         const purchase = new Purchase({
             user: userId,
             products: purchaseProducts,
-            totalCost: totalCost
+            totalCost: totalCost,
+            signature: signatureBuffer
         });
 
         await purchase.save();

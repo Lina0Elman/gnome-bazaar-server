@@ -203,6 +203,7 @@ exports.getUserPurchases = async (req, res) => {
                 },
                 quantity: item.quantity
             })),
+            signature: purchase.signature ? `data:image/webp;base64,${purchase.signature.toString('base64')}` : null
         }));
 
         res.status(StatusCodes.OK).json(purchases);

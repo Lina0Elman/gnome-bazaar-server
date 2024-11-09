@@ -9,7 +9,8 @@ const purchaseSchema = new mongoose.Schema({
         price: { type: mongoose.Schema.Types.Decimal128, required: true }
     }],
     totalCost: { type: mongoose.Schema.Types.Decimal128, required: true },
-    purchaseDate: { type: Date, default: Date.now }
+    purchaseDate: { type: Date, default: Date.now },
+    signature: { type: Buffer, required: false }
 });
 
 // Static methods for Purchase model
